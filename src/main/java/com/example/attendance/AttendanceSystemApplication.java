@@ -19,5 +19,5 @@ public class AttendanceSystemApplication {
 
     @GetMapping("/about")
     public String about() {
-        return "xxx 3382727 计算机科学与技术";}
+        return "张三 1 计算机科学与技术";}
 }
