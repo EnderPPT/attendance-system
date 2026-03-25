@@ -3,12 +3,27 @@ package com.example.attendance.controller;
 import com.example.attendance.entity.Student;
 import com.example.attendance.common.Result;
 
+import com.example.attendance.service.StudentService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
 @RestController
 public class StudentController {
+    @Autowired
+    private StudentService studentService;
+
+    @PostMapping("/student/create")
+    public Result<String> createStudent(@RequestBody Student student) {
+        try {
+            String msg = studentService.createStudent(student);
+            return Result.success(msg);
+        } catch (Exception e) {
+            return Result.error(e.getMessage());
+        }
+    }
+
     @GetMapping("/student/info")
     public String getStudentInfo() {
         return "姓名：张三，学号：1，专业：计算机科学与技术";
