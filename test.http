@@ -1,0 +1,36 @@
+### 1. 测试新增用户 (POST 请求，带 JSON 数据)
+POST http://localhost:8085/user/add
+Content-Type: application/json
+
+{
+  "username": "new_student",
+  "password": "123",
+  "realName": "新同学",
+  "role": "STUDENT"
+}
+
+### 2. 测试根据 ID 查询用户 (GET 请求)
+GET http://localhost:8085/user/1
+Accept: application/json
+
+### 3. 测试根据用户名查询 (GET 请求)
+GET http://localhost:8085/user/username/admin
+Accept: application/json
+
+### 4. 测试查询所有教师 (GET 请求)
+GET http://localhost:8085/user/teachers
+Accept: application/json
+
+### 5. 测试更新用户 (PUT 请求，修改之前添加的 new_student)
+PUT http://localhost:8085/user/update
+Content-Type: application/json
+
+{
+  "id": 8,
+  "password": "456",
+  "realName": "新同学(已修改)",
+  "role": "STUDENT"
+}
+
+### 6. 测试删除用户 (DELETE 请求)
+DELETE http://localhost:8085/user/8
