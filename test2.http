@@ -1,0 +1,52 @@
+### 1. 测试新增学生
+POST http://localhost:8085/student/create
+Content-Type: application/json
+
+{
+  "studentId": "S1001",
+  "name": "张三",
+  "className": "计科1班",
+  "age": 20
+}
+
+### 2. 测试根据学号查询学生
+GET http://localhost:8085/student/S1001
+Accept: application/json
+
+### 3. 测试查询所有学生
+GET http://localhost:8085/student/all
+Accept: application/json
+
+### 4. 测试根据班级查询学生
+GET http://localhost:8085/student/list?className=计科1班
+Accept: application/json
+
+### 5. 测试删除学生
+DELETE http://localhost:8085/student/S1001
+Accept: application/json
+
+### 6. 测试新增考勤记录
+POST http://localhost:8085/attendance/create
+Content-Type: application/json
+
+{
+  "courseId": 1,
+  "studentId": 3,
+  "checkInTime": "2026-04-15T08:50:00",
+  "seatRow": 2,
+  "seatCol": 3,
+  "status": "NORMAL",
+  "ip": "192.168.1.10"
+}
+
+### 7. 测试查询所有考勤记录
+GET http://localhost:8085/attendance/all
+Accept: application/json
+
+### 8. 测试根据学生ID查询考勤
+GET http://localhost:8085/attendance/student/3
+Accept: application/json
+
+### 9. 测试根据课程ID查询考勤
+GET http://localhost:8085/attendance/course/1
+Accept: application/json
