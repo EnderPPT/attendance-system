@@ -1,6 +1,8 @@
 package com.example.attendance.service;
 
 import com.example.attendance.entity.Attendance;
+import com.example.attendance.dto.AttendanceQueryDTO;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -13,4 +15,8 @@ public interface AttendanceService {
     List<Attendance> getByStudentId(Long studentId);
 
     List<Attendance> getByCourseId(Long courseId);
+
+    Page<Attendance> getPage(int page, int size, String soryBy, String direction);
+
+    Page<Attendance> queryByCondition(AttendanceQueryDTO QueryDTO);
 }

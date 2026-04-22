@@ -1,0 +1,68 @@
+### 1. 分页查询：第一页，每页5条
+GET http://localhost:8085/attendance/page?page=1&size=5
+Accept: application/json
+
+### 2. 分页 + 按考勤时间降序
+GET http://localhost:8085/attendance/page?page=1&size=5&sortBy=checkInTime&direction=desc
+Accept: application/json
+
+### 3. 分页 + 按学生ID升序
+GET http://localhost:8085/attendance/page?page=2&size=5&sortBy=studentId&direction=asc
+Accept: application/json
+
+### 4. 条件查询：按学生ID
+POST http://localhost:8085/attendance/search
+Content-Type: application/json
+
+{
+  "studentId": 3,
+  "page": 1,
+  "size": 10
+}
+
+### 5. 条件查询：按课程ID
+POST http://localhost:8085/attendance/search
+Content-Type: application/json
+
+{
+  "courseId": 1,
+  "page": 1,
+  "size": 10
+}
+
+### 6. 条件查询：按状态
+POST http://localhost:8085/attendance/search
+Content-Type: application/json
+
+{
+  "status": "LATE",
+  "page": 1,
+  "size": 10
+}
+
+### 7. 条件查询：按时间范围
+POST http://localhost:8085/attendance/search
+Content-Type: application/json
+
+{
+  "startTime": "2026-04-01 00:00:00",
+  "endTime": "2026-04-30 23:59:59",
+  "page": 1,
+  "size": 10
+}
+
+### 8. 多条件组合查询
+POST http://localhost:8085/attendance/search
+Content-Type: application/json
+
+{
+  "studentId": 3,
+  "courseId": 1,
+  "status": "NORMAL",
+  "startTime": "2026-04-01 00:00:00",
+  "endTime": "2026-04-30 23:59:59",
+  "page": 1,
+  "size": 10,
+  "sortBy": "checkInTime",
+  "direction": "desc"
+}
