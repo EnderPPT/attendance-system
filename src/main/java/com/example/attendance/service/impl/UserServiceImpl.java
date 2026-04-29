@@ -42,4 +42,14 @@ public class UserServiceImpl implements UserService {
     public void deleteUser(Long id) {
         userDao.deleteById(id);
     }
+
+    @Override
+    public User findByUsernameOrNull(String username) {
+        return userDao.findByUsernameOrNull(username);
+    }
+
+    @Override
+    public boolean existsByUsername(String username) {
+        return userDao.existsByUsername(username);
+    }
 }
