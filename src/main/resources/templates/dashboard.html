@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>系统首页</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<div class="container">
+    <h1 th:text="${title}">系统首页</h1>
+
+    <p>登录成功，欢迎进入班级考勤管理系统！</p>
+
+    <ul>
+        <li><a href="/student/all">查看学生接口</a></li>
+        <li><a href="/attendance/page?page=1&size=5">查看考勤分页接口</a></li>
+        <li><a href="/register">注册新用户</a></li>
+        <li><a href="/login">返回登录页</a></li>
+    </ul>
+</div>
+
+</body>
+</html>
