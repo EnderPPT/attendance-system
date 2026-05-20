@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>考勤记录管理</title>
+    <link rel="stylesheet" href="/css/style.css" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="student-page app-page">
+    <section class="hero-card">
+        <div class="hero-content">
+            <div>
+                <div class="eyebrow">✨ ATTENDANCE RECORDS</div>
+                <h1 class="hero-title">全量考勤追踪与筛选</h1>
+                <p class="hero-desc">按日期范围、课程号以及出勤状态随时提取需要的数据报表。</p>
+            </div>
+            <div class="hero-stat">
+                <strong th:text="${pageData.totalElements}">0</strong>
+                <span>查询匹配结果</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="panel">
+        <!-- 筛选面板 -->
+        <form class="toolbar" th:action="@{/attendance/page/list}" method="get" style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;">
+            <div class="field">
+                <input type="number" name="courseId" placeholder="课程编号..." th:value="${courseId}">
+            </div>
+            <div class="field">
+                <select name="status">
+                    <option value="">-- 所有状态 --</option>
+                    <option value="NORMAL" th:selected="${status == 'NORMAL'}">正常出勤 (NORMAL)</option>
+                    <option value="LATE" th:selected="${status == 'LATE'}">迟到 (LATE)</option>
+                    <option value="EARLY" th:selected="${status == 'EARLY'}">早退 (EARLY)</option>
+                    <option value="ABSENT" th:selected="${status == 'ABSENT'}">缺勤 (ABSENT)</option>
+                </select>
+            </div>
+            <div class="field">
+                <label style="font-size:12px; margin-right:5px;">自(Start)：</label>
+                <input type="date" name="startTime" th:value="${startTime}">
+            </div>
+            <div class="field">
+                <label style="font-size:12px; margin-right:5px;">至(End)：</label>
+                <input type="date" name="endTime" th:value="${endTime}">
+            </div>
+            <button type="submit" class="btn btn-primary">🔍 根据条件筛选</button>
+            <a th:href="@{/attendance/page/list}" class="btn" style="background:#e2e8f0; color:#334155;">清空</a>
+        </form>
+
+        <!-- 记录表格 -->
+        <div class="table-wrap">
+            <table>
+                <thead>
+                <tr>
+                    <th>打卡标识(ID)</th>
+                    <th>学号(Student)</th>
+                    <th>课程号(Course)</th>
+                    <th>打卡时间</th>
+                    <th>座位</th>
+                    <th>出勤状态</th>
+                </tr>
+                </thead>
+                <tbody>
+                <!-- 无数据提示 -->
+                <tr th:if="${#lists.isEmpty(pageData.content)}">
+                    <td colspan="6" style="text-align: center; color: #94a3b8; padding: 30px;">
+                        未能按条件查询到考勤记录
+                    </td>
+                </tr>
+                <!-- 数据行 -->
+                <tr th:each="record : ${pageData.content}">
+                    <td th:text="'#' + ${record.id}"></td>
+                    <td th:text="${record.studentId}"></td>
+                    <td th:text="${record.courseId}"></td>
+                    <td th:text="${#calendars.format(record.checkInTime, 'yyyy-MM-dd HH:mm:ss')}"></td>
+                    <td th:text="${record.seatRow} + '排' + ${record.seatCol} + '列'"></td>
+                    <td>
+                        <!-- 根据状态显示不同颜色徽章 -->
+                        <span th:if="${record.status == 'NORMAL'}" class="badge badge-success">正常</span>
+                        <span th:if="${record.status == 'LATE'}" class="badge badge-error">迟到</span>
+                        <span th:if="${record.status == 'EARLY'}" class="badge badge-error">早退</span>
+                        <span th:if="${record.status == 'ABSENT'}" class="badge" style="background:gray;color:white;">缺勤</span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 完整的分页控制区域 -->
+        <div style="margin-top: 20px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: #64748b;" th:if="${pageData.totalPages > 0}">
+            <div>
+                当前第 <span th:text="${pageData.number + 1}"></span> 页 / 共 <span th:text="${pageData.totalPages}"></span> 页
+                ，总计 <span th:text="${pageData.totalElements}"></span> 条记录
+            </div>
+
+            <div style="display: flex; gap: 8px;">
+                <!-- 上一页按钮 -->
+                <a th:if="${pageData.hasPrevious()}"
+                   th:href="@{/attendance/page/list(page=${pageData.number}, courseId=${courseId}, status=${status}, startTime=${startTime}, endTime=${endTime})}"
+                   class="btn" style="padding: 4px 12px; height: auto; background: #f1f5f9; color: #334155;">
+                    上一页
+                </a>
+                <span th:unless="${pageData.hasPrevious()}" class="btn" style="padding: 4px 12px; height: auto; background: #f8fafc; color: #cbd5e1; cursor: not-allowed;">
+                   上一页
+                </span>
+
+                <!-- 下一页按钮 -->
+                <a th:if="${pageData.hasNext()}"
+                   th:href="@{/attendance/page/list(page=${pageData.number + 2}, courseId=${courseId}, status=${status}, startTime=${startTime}, endTime=${endTime})}"
+                   class="btn" style="padding: 4px 12px; height: auto; background: #f1f5f9; color: #334155;">
+                    下一页
+                </a>
+                <span th:unless="${pageData.hasNext()}" class="btn" style="padding: 4px 12px; height: auto; background: #f8fafc; color: #cbd5e1; cursor: not-allowed;">
+                   下一页
+                </span>
+            </div>
+        </div>
+    </section>
+</div>
+</body>
+</html>

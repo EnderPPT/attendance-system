@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学生考勤打卡</title>
+    <link rel="stylesheet" href="/css/style.css" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="app-page">
+    <section class="hero-card">
+        <div class="hero-content">
+            <div>
+                <div class="eyebrow">✨ CHECK IN</div>
+                <h1 class="hero-title">考勤打卡大厅</h1>
+                <p class="hero-desc">在此处完成相关课程的考勤提交。系统将自动记录并判定考勤时间状态。</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="panel">
+        <p th:if="${errorMsg}" class="error" th:text="${errorMsg}"></p>
+        <p th:if="${successMsg}" class="success" th:text="${successMsg}"></p>
+
+        <form th:action="@{/attendance/page/checkin}" method="post">
+            <div class="form-grid">
+                <div class="form-group full">
+                    <label>学号 (Student ID)</label>
+                    <input type="number" name="studentId" placeholder="请输入你的学号" required>
+                </div>
+
+                <div class="form-group full">
+                    <label>课程编号 (Course ID)</label>
+                    <input type="number" name="courseId" placeholder="请输入当前课程编号" required>
+                </div>
+
+                <div class="form-group">
+                    <label>座位排数</label>
+                    <input type="number" name="seatRow" placeholder="例如: 3" required>
+                </div>
+
+                <div class="form-group">
+                    <label>座位列数</label>
+                    <input type="number" name="seatCol" placeholder="例如: 5" required>
+                </div>
+            </div>
+
+            <div class="btn-row">
+                <button type="submit" class="btn btn-primary btn-block">⚡ 立即提交打卡</button>
+            </div>
+        </form>
+    </section>
+</div>
+</body>
+</html>

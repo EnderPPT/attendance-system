@@ -26,4 +26,13 @@ public class Student {
 
     @Column(name = "age")
     private Integer age;
+
+    @Column(name = "gender", length = 10)
+    private String gender;
+
+    @Column(name = "birth_date")
+    private String birthDate;
+
+    @Column(name = "phone", length = 20)
+    private String phone;
 }

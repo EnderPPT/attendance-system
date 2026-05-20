@@ -10,7 +10,7 @@ public class AttendanceQueryDTO {
     private String startTime;
     private String endTime;
     private Integer page = 1;
-    private Integer size = 5;
+    private Integer size = 20;
     private String sortBy = "checkInTime";
     private String direction = "desc";
 }

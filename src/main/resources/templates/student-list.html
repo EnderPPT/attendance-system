@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>学生管理中心</title>
+  <link rel="stylesheet" href="/css/style.css" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="student-page">
+  <section class="hero-card">
+    <div class="hero-content">
+      <div>
+        <div class="eyebrow">✨ STUDENT MANAGEMENT</div>
+        <h1 class="hero-title">学生信息管理中心</h1>
+        <p class="hero-desc">支持学生信息搜索、排序、编辑、单个删除与批量删除。</p>
+      </div>
+
+      <div class="hero-stat">
+        <strong th:text="${#lists.size(students)}">0</strong>
+        <span>当前显示学生</span>
+      </div>
+
+      <a class="btn btn-add" th:href="@{/student/page/add}">＋ 新增学生</a>
+    </div>
+  </section>
+
+  <section class="panel">
+    <form class="toolbar" th:action="@{/student/page/list}" method="get">
+      <div class="field">
+        <span class="search-icon">🔍</span>
+        <input type="text"
+               name="keyword"
+               placeholder="输入学号、姓名或班级搜索"
+               th:value="${keyword}">
+      </div>
+
+      <div class="field">
+        <select name="sortBy">
+          <option value="studentId" th:selected="${sortBy == 'studentId'}">按学号排序</option>
+          <option value="name" th:selected="${sortBy == 'name'}">按姓名排序</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <select name="direction">
+          <option value="asc" th:selected="${direction == 'asc'}">升序</option>
+          <option value="desc" th:selected="${direction == 'desc'}">降序</option>
+        </select>
+      </div>
+
+      <button type="submit" class="btn btn-primary">搜索</button>
+      <a class="btn btn-reset" th:href="@{/student/page/list}">重置</a>
+    </form>
+
+    <form th:action="@{/student/page/deleteBatch}" method="post" onsubmit="return confirmBatchDelete();">
+      <div class="batch-row">
+        <span>勾选学生后可以进行批量删除。</span>
+        <button type="submit" class="btn btn-batch">批量删除</button>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+          <tr>
+            <th><input type="checkbox" onclick="toggleAll(this)" title="全选"></th>
+            <th>学号</th>
+            <th>姓名</th>
+            <th>班级</th>
+            <th>年龄</th>
+            <th>性别</th>
+            <th>出生日期</th>
+            <th>联系方式</th>
+            <th>操作</th>
+          </tr>
+          </thead>
+
+          <tbody>
+          <tr th:if="${#lists.isEmpty(students)}">
+            <td colspan="9" class="empty">
+              <span class="empty-icon">📭</span>
+              暂无学生数据，点击右上角“新增学生”开始添加。
+            </td>
+          </tr>
+
+          <tr th:each="student : ${students}">
+            <td>
+              <input type="checkbox" name="studentIds" th:value="${student.studentId}">
+            </td>
+            <td class="student-id" th:text="${student.studentId}">S1001</td>
+            <td class="name-cell" th:text="${student.name}">张三</td>
+            <td th:text="${student.className}">计科1班</td>
+            <td th:text="${student.age}">20</td>
+            <td>
+              <span th:classappend="${student.gender == '男'} ? ' badge-male' : (${student.gender == '女'} ? ' badge-female' : ' badge-other')"
+                    class="badge"
+                    th:text="${student.gender}">男</span>
+            </td>
+            <td th:text="${student.birthDate}">2004-01-01</td>
+            <td th:text="${student.phone}">13800000000</td>
+            <td>
+              <div class="actions">
+                <a class="btn btn-edit"
+                   th:href="@{/student/page/edit/{studentId}(studentId=${student.studentId})}">编辑</a>
+                 <a class="btn btn-delete"
+                   th:href="@{/student/page/delete/{studentId}(studentId=${student.studentId})}"
+                   th:data-name="${student.name}"
+                   onclick="return confirmDelete(this);">删除</a>
+              </div>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </form>
+  </section>
+</div>
+
+<script>
+  function toggleAll(source) {
+    const checkboxes = document.querySelectorAll('input[name="studentIds"]');
+    checkboxes.forEach(function (checkbox) {
+      checkbox.checked = source.checked;
+    });
+  }
+
+  function confirmBatchDelete() {
+    const checked = document.querySelectorAll('input[name="studentIds"]:checked');
+
+    if (checked.length === 0) {
+      alert('请先选择要删除的学生');
+      return false;
+    }
+
+    return confirm('确定要删除选中的 ' + checked.length + ' 名学生吗？删除后不能恢复。');
+  }
+
+  function confirmDelete(element) {
+    const name = element.getAttribute('data-name') || '该学生';
+    return confirm('确定要删除【' + name + '】吗？删除后不能恢复。');
+  }
+</script>
+</body>
+</html>

@@ -2,23 +2,53 @@
 <html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>系统首页</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="/css/style.css" th:href="@{/css/style.css}">
 </head>
 <body>
+<div class="app-page">
+    <section class="hero-card">
+        <div class="hero-content">
+            <div>
+                <div class="eyebrow">✨ DASHBOARD</div>
+                <h1 class="hero-title" th:text="${title}">系统首页</h1>
+                <p class="hero-desc">登录成功，欢迎进入班级考勤管理系统。请选择下面的功能继续操作。</p>
+            </div>
+            <div class="hero-stat">
+                <strong>✓</strong>
+                <span>登录成功</span>
+            </div>
+        </div>
+    </section>
 
-<div class="container">
-    <h1 th:text="${title}">系统首页</h1>
+    <section class="panel">
+        <div class="menu-grid">
+            <a class="menu-card" href="/student/page/list">
+                <span class="menu-icon">🎓</span>
+                <span class="menu-title">学生管理页面</span>
+                <span class="menu-desc">进入学生列表，支持新增、编辑、搜索、排序与删除。</span>
+            </a>
 
-    <p>登录成功，欢迎进入班级考勤管理系统！</p>
+            <a class="menu-card" href="/student/all">
+                <span class="menu-icon">📘</span>
+                <span class="menu-title">学生数据接口</span>
+                <span class="menu-desc">查看学生接口返回的 JSON 数据。</span>
+            </a>
 
-    <ul>
-        <li><a href="/student/all">查看学生接口</a></li>
-        <li><a href="/attendance/page?page=1&size=5">查看考勤分页接口</a></li>
-        <li><a href="/register">注册新用户</a></li>
-        <li><a href="/login">返回登录页</a></li>
-    </ul>
+            <a class="menu-card" href="/attendance/page?page=1&size=5">
+                <span class="menu-icon">📊</span>
+                <span class="menu-title">考勤分页接口</span>
+                <span class="menu-desc">查看考勤分页查询接口测试结果。</span>
+            </a>
+
+            <a class="menu-card" href="/login">
+                <span class="menu-icon">🚪</span>
+                <span class="menu-title">返回登录页</span>
+                <span class="menu-desc">退出当前页面，回到登录入口。</span>
+            </a>
+        </div>
+    </section>
 </div>
-
 </body>
 </html>
