@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>批量导入学生信息</title>
+    <link rel="stylesheet" href="/css/style.css" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="app-page">
+    <section class="hero-card">
+        <div class="hero-content">
+            <div>
+                <div class="eyebrow">✨ STUDENT IMPORT</div>
+                <h1 class="hero-title">批量导入学生名册</h1>
+                <p class="hero-desc">请上传包含【学号、姓名、性别...班级】等格式的 Excel 文件进行批量导入。</p>
+            </div>
+            <a href="/student/page/list" class="btn" style="background:rgba(255,255,255,.2); color:white;">返回学生列表</a>
+        </div>
+    </section>
+
+    <section class="panel">
+        <p th:if="${error}" class="error" th:text="${error}"></p>
+        <p th:if="${success}" class="success" th:text="${success}"></p>
+
+        <form th:action="@{/student/page/import}" method="post" enctype="multipart/form-data">
+            <div class="form-grid">
+                <div class="form-group full">
+                    <label>选择Excel文件：</label>
+                    <input type="file" name="file" accept=".xlsx,.xls" required>
+                    <p style="font-size:12px; color:gray;">支持.xlsx和.xls格式，文件大小不超过10MB</p>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary" style="margin-top: 15px;" onclick="this.innerHTML='解析导入中...'; this.style.opacity='0.8';">⚡ 上传并解析入库</button>
+        </form>
+    </section>
+</div>
+</body>
+</html>

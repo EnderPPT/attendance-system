@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>批量导入考勤</title>
+    <link rel="stylesheet" href="/css/style.css" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="app-page">
+    <section class="hero-card">
+        <div class="hero-content">
+            <div>
+                <div class="eyebrow">✨ ATTENDANCE IMPORT</div>
+                <h1 class="hero-title">批量导入考勤记录</h1>
+                <p class="hero-desc">请上传包含【学号、课程号、打卡时间、状态】格式的 Excel 文件，系统将自动解析并录入数据库。</p>
+            </div>
+            <a href="/attendance/page/list" class="btn" style="background:rgba(255,255,255,.2); color:white;">返回考勤列表</a>
+        </div>
+    </section>
+
+    <section class="panel">
+        <!-- 成功与失败提示 -->
+        <p th:if="${error}" class="error" th:text="${error}"></p>
+        <p th:if="${success}" class="success" th:text="${success}"></p>
+
+        <form th:action="@{/attendance/page/import}" method="post" enctype="multipart/form-data">
+            <div class="form-grid">
+                <div class="form-group full">
+                    <label>选择考勤数据表 (Excel文件)：</label>
+                    <input type="file" name="file" accept=".xlsx,.xls" required onchange="checkFileSize(this)">
+                    <p style="font-size:13px; color:#64748b; margin-top:8px;">提示：支持 .xlsx 和 .xls 格式，文件大小不超过10MB。</p>
+                </div>
+            </div>
+            <div style="display: flex; align-items: center; margin-top: 15px;">
+                <button type="submit" class="btn btn-primary" onclick="showLoading()">⚡ 上传并解析入库</button>
+                <span id="loadingText" style="display:none; color:#0ea5e9; font-size: 14px; font-weight: bold; margin-left:15px;">正在解析导入中，请稍候...</span>
+            </div>
+        </form>
+    </section>
+</div>
+
+<script>
+    function checkFileSize(input) {
+        if(input.files && input.files[0]) {
+            if(input.files[0].size > 10 * 1024 * 1024) {
+                alert("文件大小不能超过 10MB！");
+                input.value = ""; // 清空选择
+            }
+        }
+    }
+    function showLoading() {
+        var fileInput = document.querySelector('input[type="file"]');
+        // 确保选择了文件才显示 loading
+        if(fileInput.value) {
+            document.querySelector('button[type="submit"]').style.opacity = '0.8';
+            document.getElementById("loadingText").style.display = "inline-block";
+        }
+    }
+</script>
+</body>
+</html>

@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
-import java.util.ArrayList;
 
 @Controller
 public class StudentPageController {
@@ -117,5 +116,40 @@ public class StudentPageController {
     public String deleteBatch(@RequestParam(required = false) List<String> studentIds) {
         studentService.deleteBatch(studentIds);
         return "redirect:/student/page/list";
+    }
+
+    @org.springframework.beans.factory.annotation.Value("${file.upload.path}")
+    private String uploadPath;
+
+    // 1. 跳转到学生导入页面
+    @GetMapping("/student/page/import")
+    public String importPage() {
+        return "student-import";
+    }
+
+    // 2. 处理学生文件上传
+    @PostMapping("/student/page/import")
+    public String importStudentFile(@RequestParam("file") org.springframework.web.multipart.MultipartFile file,
+                                    org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+        if (file.isEmpty() || (!file.getOriginalFilename().endsWith(".xlsx") && !file.getOriginalFilename().endsWith(".xls"))) {
+            redirectAttributes.addFlashAttribute("error", "无效文件！请上传 Excel 文件");
+            return "redirect:/student/page/import";
+        }
+        try {
+            java.io.File dest = new java.io.File(uploadPath + file.getOriginalFilename());
+            if(!dest.getParentFile().exists()) dest.getParentFile().mkdirs();
+            file.transferTo(dest);
+
+            com.example.attendance.dto.ImportResult result = studentService.importStudentsFromExcel(dest);
+
+            String msg = "学生导入成功: " + result.getSuccessCount() + " 人。失败: " + result.getFailCount() + " 人。";
+            if(result.getFailCount() > 0) {
+                msg += " 失败原因示例：" + String.join(" | ", result.getFailReports().subList(0, Math.min(3, result.getFailCount())));
+            }
+            redirectAttributes.addFlashAttribute("success", msg);
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "服务器解析异常: " + e.getMessage());
+        }
+        return "redirect:/student/page/import";
     }
 }

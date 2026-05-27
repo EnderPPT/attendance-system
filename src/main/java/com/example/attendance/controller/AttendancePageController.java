@@ -1,9 +1,11 @@
 package com.example.attendance.controller;
 
 import com.example.attendance.dto.AttendanceQueryDTO;
+import com.example.attendance.dto.ImportResult;
 import com.example.attendance.entity.Attendance;
 import com.example.attendance.service.AttendanceService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -84,5 +86,38 @@ public class AttendancePageController {
         model.addAttribute("endTime", endTime);
 
         return "attendance-list";
+    }
+
+    @Value("${file.upload.path}")
+    private String uploadPath;
+
+    @GetMapping("/import")
+    public String importPage() {
+        return "attendance-import";
+    }
+
+    @PostMapping("/import")
+    public String importFile(@RequestParam("file") org.springframework.web.multipart.MultipartFile file,
+                             org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+        if (file.isEmpty() || (!file.getOriginalFilename().endsWith(".xlsx") && !file.getOriginalFilename().endsWith(".xls"))) {
+            redirectAttributes.addFlashAttribute("error", "无效文件！请上传 Excel 文件");
+            return "redirect:/attendance/page/import";
+        }
+        try {
+            java.io.File dest = new java.io.File(uploadPath + file.getOriginalFilename());
+            if(!dest.getParentFile().exists()) dest.getParentFile().mkdirs();
+            file.transferTo(dest);
+
+            ImportResult result = attendanceService.importFromExcel(dest);
+
+            String msg = "成功: " + result.getSuccessCount() + " 条。失败: " + result.getFailCount() + " 条。";
+            if(result.getFailCount() > 0) {
+                msg += " 失败原因示例：" + String.join(" | ", result.getFailReports().subList(0, Math.min(3, result.getFailCount())));
+            }
+            redirectAttributes.addFlashAttribute("success", msg);
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "服务器解析异常: " + e.getMessage());
+        }
+        return "redirect:/attendance/page/import";
     }
 }
