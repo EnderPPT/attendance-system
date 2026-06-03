@@ -24,17 +24,16 @@ public class AuthController {
 
     @PostMapping("/login")
     public Result<LoginResponse> login(@RequestBody LoginRequest request, HttpSession session) {
-        User user = userService.findByUsernameOrNull(request.getUsername());
+        if (request == null || isBlank(request.getUsername()) || isBlank(request.getPassword())) {
+            return Result.error("用户名和密码不能为空");
+        }
+        User user = userService.findByUsernameOrNull(request.getUsername().trim());
 
-        if (user == null) {
-            return Result.error("用户不存在");
+        if (user == null || !passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            return Result.error("用户名或密码错误");
         }
 
-        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            return Result.error("密码错误");
-        }
-
-        session.setAttribute(AuthorizationInterceptor.SESSION_USER, user);
+        session.setAttribute(AuthorizationInterceptor.SESSION_USER, sessionUser(user));
 
         LoginResponse response = new LoginResponse(
                 user.getId(),
@@ -48,19 +47,31 @@ public class AuthController {
 
     @PostMapping("/register")
     public Result<String> register(@RequestBody RegisterRequest request) {
-        if (userService.existsByUsername(request.getUsername())) {
+        if (request == null || isBlank(request.getUsername()) || isBlank(request.getPassword()) || isBlank(request.getRealName())) {
+            return Result.error("用户名、密码和真实姓名不能为空");
+        }
+        String username = request.getUsername().trim();
+        if (userService.existsByUsername(username)) {
             return Result.error("用户名已存在");
         }
 
         User user = new User();
-        user.setUsername(request.getUsername());
+        user.setUsername(username);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setRealName(request.getRealName());
+        user.setRealName(request.getRealName().trim());
 
         user.setRole("STUDENT");
 
         userService.addUser(user);
 
         return Result.success("注册成功");
+    }
+
+    private boolean isBlank(String value) {
+        return value == null || value.trim().isEmpty();
+    }
+
+    private User sessionUser(User user) {
+        return new User(user.getId(), user.getUsername(), null, user.getRealName(), user.getRole(), user.getCreateTime());
     }
 }

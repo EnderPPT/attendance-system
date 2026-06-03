@@ -15,6 +15,12 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long>, J
 
     List<Attendance> findByStudentIdAndStatus(Long studentId, String status);
 
+    boolean existsByCourseIdAndStudentIdAndCheckInTimeGreaterThanEqualAndCheckInTimeLessThan(
+            Long courseId, Long studentId, java.sql.Timestamp start, java.sql.Timestamp end);
+
+    boolean existsByCourseIdAndSeatRowAndSeatColAndCheckInTimeGreaterThanEqualAndCheckInTimeLessThan(
+            Long courseId, Integer seatRow, Integer seatCol, java.sql.Timestamp start, java.sql.Timestamp end);
+
     // 统计指定学生的总打卡数
     long countByStudentId(Long studentId);
 
