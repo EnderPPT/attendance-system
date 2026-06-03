@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title th:text="${pageTitle}">课程表单</title><link rel="stylesheet" th:href="@{/css/style.css}"></head>
-<body><div class="app-page form-page"><nav class="page-nav"><a href="/dashboard">首页</a><a class="active" href="/course/page/list">课程管理</a><a href="/attendance/page/list">考勤记录</a><a href="/leave/page/list">请假管理</a></nav>
+<body><div class="app-page form-page"><nav class="page-nav"><a class="active" href="/dashboard">首页</a></nav>
 <section class="hero-card"><div class="hero-content"><div><div class="eyebrow">📘 COURSE FORM</div><h1 class="hero-title" th:text="${pageTitle}">新增课程</h1><p class="hero-desc">填写课程基本信息、授课安排和教室座位布局。</p></div><a class="btn btn-add" href="/course/page/list">返回课程列表</a></div></section>
 <section class="panel"><p th:if="${error}" class="error" th:text="${error}"></p><form th:action="@{/course/page/save}" th:object="${course}" method="post"><input type="hidden" th:field="*{courseId}"><div class="form-grid">
 <div class="form-group"><label>课程代码</label><input th:field="*{courseCode}" required maxlength="20" placeholder="例如 CS101"></div><div class="form-group"><label>课程名称</label><input th:field="*{courseName}" required maxlength="50" placeholder="例如 Java Web 开发"></div>
