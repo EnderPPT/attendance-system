@@ -27,8 +27,10 @@
         <form th:action="@{/attendance/page/checkin}" method="post">
             <div class="form-grid">
                 <div class="form-group full">
-                    <label>学号 (Student ID)</label>
-                    <input type="number" name="studentId" placeholder="请输入你的学号" required>
+                    <label>学生 ID</label>
+                    <input th:if="${isStudent}" type="number" name="studentId" th:value="${sessionUserId}" readonly required>
+                    <input th:unless="${isStudent}" type="number" name="studentId" placeholder="请输入学生用户 ID" required>
+                    <small th:if="${isStudent}">学生身份由当前登录账号自动确定，不能代替他人打卡。</small>
                 </div>
 
                 <div class="form-group full">
