@@ -8,6 +8,7 @@
 </head>
 <body>
 <div class="app-page">
+    <nav class="page-nav"><a href="/dashboard">首页</a><a href="/course/page/list">课程管理</a><a class="active" href="/attendance/page/checkin">考勤打卡</a><a href="/attendance/page/list">考勤记录</a><a href="/leave/page/list">请假管理</a></nav>
     <section class="hero-card">
         <div class="hero-content">
             <div>
@@ -15,7 +16,7 @@
                 <h1 class="hero-title">考勤打卡大厅</h1>
                 <p class="hero-desc">在此处完成相关课程的考勤提交。系统将自动记录并判定考勤时间状态。</p>
             </div>
-            <a href="/student/page/list" class="btn" style="background:rgba(255,255,255,.2); color:white;">返回学生列表</a>
+            <a href="/course/page/list" class="btn btn-add">返回课程列表</a>
         </div>
     </section>
 
@@ -31,8 +32,13 @@
                 </div>
 
                 <div class="form-group full">
-                    <label>课程编号 (Course ID)</label>
-                    <input type="number" name="courseId" placeholder="请输入当前课程编号" required>
+                    <label>课程</label>
+                    <select name="courseId" required>
+                        <option value="">请选择课程</option>
+                        <option th:each="course : ${courses}" th:value="${course.courseId}"
+                                th:selected="${course.courseId == courseId}"
+                                th:text="${course.courseCode + ' · ' + course.courseName + ' · ' + course.className}"></option>
+                    </select>
                 </div>
 
                 <div class="form-group">
