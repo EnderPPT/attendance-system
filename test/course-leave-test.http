@@ -1,0 +1,40 @@
+### 新增课程
+POST http://localhost:8085/api/course
+Content-Type: application/json
+
+{
+  "courseCode": "CS103",
+  "courseName": "软件工程",
+  "className": "计科1班",
+  "teacherId": 2,
+  "classroomName": "第一教学楼-202",
+  "layoutRows": 8,
+  "layoutCols": 10,
+  "weekday": 2,
+  "startWeek": 1,
+  "endWeek": 16
+}
+
+### 查询全部课程
+GET http://localhost:8085/api/course
+Accept: application/json
+
+### 提交请假申请（请将时间改为未来时间）
+POST http://localhost:8085/api/leave/apply
+Content-Type: application/json
+
+{
+  "studentId": 3,
+  "courseId": 1,
+  "startTime": "2027-01-10T08:00:00",
+  "endTime": "2027-01-10T10:00:00",
+  "reason": "参加比赛"
+}
+
+### 审批请假申请
+POST http://localhost:8085/api/leave/approve/1?approved=true&remark=同意
+Accept: application/json
+
+### 查询待审批申请
+GET http://localhost:8085/api/leave/status/PENDING
+Accept: application/json

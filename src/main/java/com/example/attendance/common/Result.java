@@ -17,7 +17,11 @@ public class Result<T> {
     }
 
     public static <T> Result<T> error(String msg) {
-        return new Result<>(500, msg, null);
+        return error(500, msg);
+    }
+
+    public static <T> Result<T> error(Integer code, String msg) {
+        return new Result<>(code, msg, null);
     }
 
     public static <T> Result<T> success() {

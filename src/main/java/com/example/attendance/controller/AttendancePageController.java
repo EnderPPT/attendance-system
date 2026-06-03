@@ -43,7 +43,7 @@ public class AttendancePageController {
             attendance.setCreateTime(Timestamp.valueOf(now));
             attendance.setIp("127.0.0.1");
 
-            if (now.getHour() >= 8 && now.getMinute() > 30) {
+            if (now.toLocalTime().isAfter(java.time.LocalTime.of(8, 30))) {
                 attendance.setStatus("LATE");
             } else {
                 attendance.setStatus("NORMAL");

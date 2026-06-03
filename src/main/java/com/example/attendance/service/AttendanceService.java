@@ -19,9 +19,9 @@ public interface AttendanceService {
 
     List<Attendance> getByCourseId(Long courseId);
 
-    Page<Attendance> getPage(int page, int size, String soryBy, String direction);
+    Page<Attendance> getPage(int page, int size, String sortBy, String direction);
 
-    Page<Attendance> queryByCondition(AttendanceQueryDTO QueryDTO);
+    Page<Attendance> queryByCondition(AttendanceQueryDTO queryDTO);
 
     ImportResult importFromExcel(File file);
 
