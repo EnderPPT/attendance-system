@@ -59,9 +59,12 @@ attendance-system/
 
 ## 数据库初始化
 
-1. 在 PostgreSQL 中执行 `sql/attendance.sql` 创建用户、课程、考勤和请假相关表。
-2. 如需学生示例数据，可执行 `sql/student.sql`。
-3. 根据本地数据库环境，在 `src/main/resources/application.properties` 中配置数据源连接信息。
+1. 先在 PostgreSQL 中创建数据库：`CREATE DATABASE attendance_system ENCODING 'UTF8';`。
+2. 连接到 `attendance_system` 数据库后执行 `sql/attendance.sql`，创建用户、课程、考勤和请假相关表。
+3. 如需学生示例数据，可执行 `sql/student.sql`。
+4. 默认数据源为 `jdbc:postgresql://localhost:5432/attendance_system`，用户名和密码均为 `postgres`。实际部署时请通过 `DB_URL`、`DB_USERNAME`、`DB_PASSWORD` 环境变量覆盖，上传目录可通过 `UPLOAD_PATH` 覆盖。
+
+初始化脚本中的示例账号密码均为 `123456`。首次登录后应立即修改或删除这些示例账号，生产环境不要保留默认密码。
 
 ## 启动项目
 
