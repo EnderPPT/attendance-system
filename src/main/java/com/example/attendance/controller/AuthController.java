@@ -1,6 +1,7 @@
 package com.example.attendance.controller;
 
 import com.example.attendance.common.Result;
+import com.example.attendance.config.AuthorizationInterceptor;
 import com.example.attendance.dto.LoginRequest;
 import com.example.attendance.dto.LoginResponse;
 import com.example.attendance.dto.RegisterRequest;
@@ -9,6 +10,8 @@ import com.example.attendance.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+
+import jakarta.servlet.http.HttpSession;
 
 @RestController
 @RequestMapping("/auth")
@@ -20,7 +23,7 @@ public class AuthController {
     private PasswordEncoder passwordEncoder;
 
     @PostMapping("/login")
-    public Result<LoginResponse> login(@RequestBody LoginRequest request) {
+    public Result<LoginResponse> login(@RequestBody LoginRequest request, HttpSession session) {
         User user = userService.findByUsernameOrNull(request.getUsername());
 
         if (user == null) {
@@ -30,6 +33,8 @@ public class AuthController {
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             return Result.error("密码错误");
         }
+
+        session.setAttribute(AuthorizationInterceptor.SESSION_USER, user);
 
         LoginResponse response = new LoginResponse(
                 user.getId(),
@@ -52,11 +57,7 @@ public class AuthController {
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setRealName(request.getRealName());
 
-        if (request.getRole() == null || request.getRole().trim().isEmpty()) {
-            user.setRole("STUDENT");
-        } else {
-            user.setRole(request.getRole());
-        }
+        user.setRole("STUDENT");
 
         userService.addUser(user);
 

@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>系统首页</title><link rel="stylesheet" th:href="@{/css/style.css}"></head>
-<body><div class="app-page"><section class="hero-card"><div class="hero-content"><div><div class="eyebrow">✨ DASHBOARD</div><h1 class="hero-title" th:text="${title}">系统首页</h1><p class="hero-desc">欢迎进入班级考勤管理系统。课程、考勤和请假流程已经互相联动。</p></div><div class="hero-stat"><strong>✓</strong><span>登录成功</span></div></div></section>
-<section class="panel"><div class="menu-grid">
-<a class="menu-card" href="/student/page/list"><span class="menu-icon">🎓</span><span class="menu-title">学生管理</span><span class="menu-desc">维护学生信息，支持新增、编辑、搜索与删除。</span></a>
-<a class="menu-card" href="/course/page/list"><span class="menu-icon">📚</span><span class="menu-title">课程管理</span><span class="menu-desc">维护课程与教室布局，并跳转到课程考勤或请假。</span></a>
+<body><div class="app-page"><section class="hero-card"><div class="hero-content"><div><div class="eyebrow">✨ DASHBOARD</div><h1 class="hero-title" th:text="${title}">系统首页</h1><p class="hero-desc">欢迎进入班级考勤管理系统。请从首页进入需要使用的功能。</p></div><div class="hero-stat"><strong th:text="${loginUser.realName}">用户</strong><span th:text="${loginUser.role}">角色</span></div></div></section>
+<section class="panel"><p th:if="${errorMsg}" class="error" th:text="${errorMsg}"></p><div class="menu-grid">
+<a th:if="${isManager}" class="menu-card" href="/student/page/list"><span class="menu-icon">🎓</span><span class="menu-title">学生管理</span><span class="menu-desc">维护学生信息，支持新增、编辑、搜索与删除。</span></a>
+<a th:if="${isManager}" class="menu-card" href="/course/page/list"><span class="menu-icon">📚</span><span class="menu-title">课程管理</span><span class="menu-desc">维护课程信息、授课安排与教室座位布局。</span></a>
 <a class="menu-card" href="/attendance/page/checkin"><span class="menu-icon">✅</span><span class="menu-title">考勤打卡</span><span class="menu-desc">从课程下拉框选择课程并提交座位打卡。</span></a>
-<a class="menu-card" href="/attendance/page/list"><span class="menu-icon">📊</span><span class="menu-title">考勤记录</span><span class="menu-desc">按课程、状态和日期筛选考勤记录。</span></a>
-<a class="menu-card" href="/leave/page/apply"><span class="menu-icon">📝</span><span class="menu-title">提交请假</span><span class="menu-desc">选择课程，提交未来时间段的请假申请。</span></a>
-<a class="menu-card" href="/leave/page/list"><span class="menu-icon">🗓️</span><span class="menu-title">请假管理</span><span class="menu-desc">查询请假记录并完成通过或驳回审批。</span></a>
-</div></section></div></body></html>
+<a th:if="${isManager}" class="menu-card" href="/attendance/page/list"><span class="menu-icon">📊</span><span class="menu-title">考勤记录</span><span class="menu-desc">按课程、状态和日期筛选考勤记录。</span></a>
+<a th:if="${isManager}" class="menu-card" href="/leave/page/apply"><span class="menu-icon">📝</span><span class="menu-title">提交请假</span><span class="menu-desc">选择课程，提交未来时间段的请假申请。</span></a>
+<a th:if="${isManager}" class="menu-card" href="/leave/page/list"><span class="menu-icon">🗓️</span><span class="menu-title">请假管理</span><span class="menu-desc">查询请假记录并完成通过或驳回审批。</span></a>
+</div><div class="btn-row"><a class="btn btn-secondary" href="/page/logout">退出登录</a></div></section></div></body></html>

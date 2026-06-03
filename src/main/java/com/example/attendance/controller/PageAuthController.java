@@ -1,5 +1,6 @@
 package com.example.attendance.controller;
 
+import com.example.attendance.config.AuthorizationInterceptor;
 import com.example.attendance.entity.User;
 import com.example.attendance.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,6 +8,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
+import jakarta.servlet.http.HttpSession;
 
 @Controller
 public class PageAuthController {
@@ -35,7 +38,6 @@ public class PageAuthController {
             @RequestParam String realName,
             @RequestParam String password,
             @RequestParam String confirmPassword,
-            @RequestParam(required = false) String role,
             Model model) {
         if (username == null || username.trim().isEmpty()) {
             model.addAttribute("errorMsg", "用户名不能为空");
@@ -72,11 +74,7 @@ public class PageAuthController {
         user.setRealName(realName);
         user.setPassword(passwordEncoder.encode(password));
 
-        if (role == null || role.trim().isEmpty()) {
-            user.setRole("STUDENT");
-        } else {
-            user.setRole(role);
-        }
+        user.setRole("STUDENT");
 
         userService.addUser(user);
         return "redirect:/login?registered=true";
@@ -85,7 +83,8 @@ public class PageAuthController {
     @PostMapping("/page/login")
     public String login(@RequestParam String username,
                         @RequestParam String password,
-                        Model model) {
+                        Model model,
+                        HttpSession session) {
         if (username == null || username.trim().isEmpty()) {
             model.addAttribute("errorMsg", "用户名不能为空");
             return "login";
@@ -108,12 +107,27 @@ public class PageAuthController {
             return "login";
         }
 
+        session.setAttribute(AuthorizationInterceptor.SESSION_USER, user);
         return "redirect:/dashboard";
     }
 
     @GetMapping("/dashboard")
-    public String dashboard(Model model) {
+    public String dashboard(@RequestParam(required = false) String permissionDenied,
+                            Model model,
+                            HttpSession session) {
+        User user = (User) session.getAttribute(AuthorizationInterceptor.SESSION_USER);
         model.addAttribute("title", "班级考勤管理系统首页");
+        model.addAttribute("loginUser", user);
+        model.addAttribute("isManager", "ADMIN".equalsIgnoreCase(user.getRole()) || "TEACHER".equalsIgnoreCase(user.getRole()));
+        if ("true".equals(permissionDenied)) {
+            model.addAttribute("errorMsg", "学生账号只能使用考勤打卡功能");
+        }
         return "dashboard";
+    }
+
+    @GetMapping("/page/logout")
+    public String logout(HttpSession session) {
+        session.invalidate();
+        return "redirect:/login";
     }
 }
