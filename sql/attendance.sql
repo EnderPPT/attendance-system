@@ -3,8 +3,8 @@ DROP TABLE IF EXISTS attendance CASCADE;
 DROP TABLE IF EXISTS course_selection CASCADE;
 DROP TABLE IF EXISTS course CASCADE;
 DROP TABLE IF EXISTS sys_user CASCADE;
+DROP TABLE IF EXISTS student CASCADE;
 
-CREATE DATABASE attendance_system ENCODING 'UTF8';
 
 CREATE TABLE sys_user (
     id BIGSERIAL PRIMARY KEY,
@@ -17,6 +17,17 @@ CREATE TABLE sys_user (
 COMMENT ON TABLE sys_user IS '用户表';
 COMMENT ON COLUMN sys_user.id IS '主键';
 COMMENT ON COLUMN sys_user.role IS '角色:ADMIN/TEACHER/STUDENT';
+
+CREATE TABLE student (
+    student_id VARCHAR(50) PRIMARY KEY,
+    name VARCHAR(50) NOT NULL,
+    class_name VARCHAR(50) NOT NULL,
+    age INT,
+    gender VARCHAR(10),
+    birth_date VARCHAR(50),
+    phone VARCHAR(20)
+);
+COMMENT ON TABLE student IS '学生信息表';
 
 CREATE TABLE course (
     course_id BIGSERIAL PRIMARY KEY,
@@ -64,6 +75,8 @@ CREATE TABLE attendance (
 );
 COMMENT ON TABLE attendance IS '考勤记录表';
 COMMENT ON COLUMN attendance.status IS '状态: NORMAL正常/LATE迟到/EARLY早退/ABSENT缺勤';
+CREATE UNIQUE INDEX uk_attendance_course_student_day ON attendance (course_id, student_id, CAST(check_in_time AS DATE));
+CREATE UNIQUE INDEX uk_attendance_course_seat_day ON attendance (course_id, seat_row, seat_col, CAST(check_in_time AS DATE));
 
 
 CREATE TABLE leave_application (
@@ -84,13 +97,13 @@ COMMENT ON TABLE leave_application IS '请假申请表';
 COMMENT ON COLUMN leave_application.status IS '状态: PENDING待审批/APPROVED已批准/REJECTED已拒绝';
 
 INSERT INTO sys_user (username, password, real_name, role) VALUES
-('admin', '123456', '张管理', 'ADMIN'),
-('t_wang', '123456', '王老师', 'TEACHER'),
-('s_001', '123456', '赵同学', 'STUDENT'),
-('s_002', '123456', '钱同学', 'STUDENT'),
-('s_003', '123456', '孙同学', 'STUDENT'),
-('s_004', '123456', '李同学', 'STUDENT'),
-('s_005', '123456', '周同学', 'STUDENT');
+('admin', '$2a$10$7EqJtq98hPqEX7fNZaFWoO5kTYQPX4M8lI.WKUt/J0KnLutY5zQ1G', '张管理', 'ADMIN'),
+('t_wang', '$2a$10$7EqJtq98hPqEX7fNZaFWoO5kTYQPX4M8lI.WKUt/J0KnLutY5zQ1G', '王老师', 'TEACHER'),
+('s_001', '$2a$10$7EqJtq98hPqEX7fNZaFWoO5kTYQPX4M8lI.WKUt/J0KnLutY5zQ1G', '赵同学', 'STUDENT'),
+('s_002', '$2a$10$7EqJtq98hPqEX7fNZaFWoO5kTYQPX4M8lI.WKUt/J0KnLutY5zQ1G', '钱同学', 'STUDENT'),
+('s_003', '$2a$10$7EqJtq98hPqEX7fNZaFWoO5kTYQPX4M8lI.WKUt/J0KnLutY5zQ1G', '孙同学', 'STUDENT'),
+('s_004', '$2a$10$7EqJtq98hPqEX7fNZaFWoO5kTYQPX4M8lI.WKUt/J0KnLutY5zQ1G', '李同学', 'STUDENT'),
+('s_005', '$2a$10$7EqJtq98hPqEX7fNZaFWoO5kTYQPX4M8lI.WKUt/J0KnLutY5zQ1G', '周同学', 'STUDENT');
 
 INSERT INTO course (course_code, course_name, class_name, teacher_id, classroom_name, layout_rows, layout_cols, exclude_seats, weekday, start_week, end_week) VALUES
 ('CS101', 'Java后端开发', '计科1班', 2, '第一教学楼-101', 8, 10, '1,1;1,2', 3, 1, 16),
