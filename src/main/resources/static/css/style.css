@@ -601,3 +601,114 @@ input[type="checkbox"] {
         width: 100%;
     }
 }
+
+/* shared module navigation and linked management pages */
+.page-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.page-nav a {
+    padding: 9px 14px;
+    border: 1px solid var(--slate-200);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.8);
+    color: var(--slate-700);
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.page-nav a.active,
+.page-nav a:hover {
+    border-color: transparent;
+    background: linear-gradient(135deg, var(--primary), var(--sky));
+    color: var(--white);
+}
+
+.filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 18px;
+}
+
+.filter-row .field {
+    min-width: 190px;
+    flex: 1;
+}
+
+.filter-row .field input {
+    padding-left: 14px;
+}
+
+textarea {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid var(--slate-200);
+    border-radius: 14px;
+    color: var(--slate-700);
+    font: inherit;
+    resize: vertical;
+    outline: none;
+}
+
+textarea:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.12);
+}
+
+.inline-inputs,
+.approval-form {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.approval-form input {
+    min-width: 150px;
+    height: 34px;
+}
+
+.btn-small {
+    min-width: 58px;
+    height: 34px;
+    padding: 0 10px;
+    border-radius: 11px;
+    font-size: 13px;
+}
+
+.wrap-actions {
+    flex-wrap: wrap;
+}
+
+.table-link {
+    color: var(--primary-dark);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.table-link:hover {
+    text-decoration: underline;
+}
+
+.reason-cell {
+    max-width: 220px;
+    white-space: normal;
+    text-align: left;
+}
+
+.status-badge {
+    display: inline-flex;
+    padding: 5px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.status-badge.pending { color: #b45309; background: #fef3c7; }
+.status-badge.approved { color: #047857; background: #d1fae5; }
+.status-badge.rejected { color: #b91c1c; background: #fee2e2; }

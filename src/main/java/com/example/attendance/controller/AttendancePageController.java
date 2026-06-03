@@ -4,6 +4,7 @@ import com.example.attendance.dto.AttendanceQueryDTO;
 import com.example.attendance.dto.ImportResult;
 import com.example.attendance.entity.Attendance;
 import com.example.attendance.service.AttendanceService;
+import com.example.attendance.service.CourseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -20,8 +21,13 @@ public class AttendancePageController {
     @Autowired
     private AttendanceService attendanceService;
 
+    @Autowired
+    private CourseService courseService;
+
     @GetMapping("/checkin")
-    public String checkinPage() {
+    public String checkinPage(@RequestParam(required = false) Long courseId, Model model) {
+        model.addAttribute("courses", courseService.getAll());
+        model.addAttribute("courseId", courseId);
         return "attendance-form";
     }
 
@@ -55,6 +61,8 @@ public class AttendancePageController {
         } catch (Exception e) {
             model.addAttribute("errorMsg", "打卡失败：" + e.getMessage());
         }
+        model.addAttribute("courses", courseService.getAll());
+        model.addAttribute("courseId", courseId);
         return "attendance-form";
     }
 
@@ -84,6 +92,7 @@ public class AttendancePageController {
         model.addAttribute("status", status);
         model.addAttribute("startTime", startTime);
         model.addAttribute("endTime", endTime);
+        model.addAttribute("courses", courseService.getAll());
 
         return "attendance-list";
     }
