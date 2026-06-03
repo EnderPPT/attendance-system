@@ -15,7 +15,7 @@ public class StudentController {
     private StudentService studentService;
 
     @PostMapping("/create")
-    public Result<String> createStudent(@RequestBody Student student) {
+    public Result<Student> createStudent(@RequestBody Student student) {
         try {
             return Result.success(studentService.createStudent(student));
         } catch (Exception e) {

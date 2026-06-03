@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS leave_application CASCADE;
 DROP TABLE IF EXISTS attendance CASCADE;
 DROP TABLE IF EXISTS course_selection CASCADE;
 DROP TABLE IF EXISTS course CASCADE;
@@ -63,6 +64,24 @@ CREATE TABLE attendance (
 );
 COMMENT ON TABLE attendance IS '考勤记录表';
 COMMENT ON COLUMN attendance.status IS '状态: NORMAL正常/LATE迟到/EARLY早退/ABSENT缺勤';
+
+
+CREATE TABLE leave_application (
+    id BIGSERIAL PRIMARY KEY,
+    student_id BIGINT NOT NULL,
+    course_id BIGINT NOT NULL,
+    start_time TIMESTAMP NOT NULL,
+    end_time TIMESTAMP NOT NULL,
+    reason VARCHAR(500) NOT NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'PENDING',
+    apply_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    approval_time TIMESTAMP,
+    approver_remark VARCHAR(500),
+    CONSTRAINT fk_leave_student_id FOREIGN KEY (student_id) REFERENCES sys_user(id),
+    CONSTRAINT fk_leave_course_id FOREIGN KEY (course_id) REFERENCES course(course_id)
+);
+COMMENT ON TABLE leave_application IS '请假申请表';
+COMMENT ON COLUMN leave_application.status IS '状态: PENDING待审批/APPROVED已批准/REJECTED已拒绝';
 
 INSERT INTO sys_user (username, password, real_name, role) VALUES
 ('admin', '123456', '张管理', 'ADMIN'),

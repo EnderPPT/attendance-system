@@ -4,6 +4,7 @@ import com.example.attendance.dto.AttendanceQueryDTO;
 import com.example.attendance.common.Result;
 import com.example.attendance.entity.Attendance;
 import com.example.attendance.service.AttendanceService;
+import com.example.attendance.dto.StatisticsDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -27,7 +28,7 @@ public class AttendanceController {
     }
 
     @GetMapping("/student/{studentId}")
-    public Result<List<Attendance>> getByStudenId(@PathVariable Long studentId) {
+    public Result<List<Attendance>> getByStudentId(@PathVariable Long studentId) {
         return Result.success(attendanceService.getByStudentId(studentId));
     }
 
@@ -46,7 +47,12 @@ public class AttendanceController {
     }
 
     @PostMapping("/search")
-    public Result<Page<Attendance>> seach(@RequestBody AttendanceQueryDTO queryDTO) {
+    public Result<Page<Attendance>> search(@RequestBody AttendanceQueryDTO queryDTO) {
         return Result.success(attendanceService.queryByCondition(queryDTO));
+    }
+
+    @GetMapping("/statistics/student/{studentId}")
+    public Result<StatisticsDTO> getStudentStatistics(@PathVariable Long studentId) {
+        return Result.success(attendanceService.getStudentStatistics(studentId));
     }
 }
