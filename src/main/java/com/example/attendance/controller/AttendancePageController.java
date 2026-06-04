@@ -11,6 +11,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import com.example.attendance.config.AuthorizationInterceptor;
+import com.example.attendance.entity.User;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -25,21 +29,25 @@ public class AttendancePageController {
     private CourseService courseService;
 
     @GetMapping("/checkin")
-    public String checkinPage(@RequestParam(required = false) Long courseId, Model model) {
-        model.addAttribute("courses", courseService.getAll());
-        model.addAttribute("courseId", courseId);
+    public String checkinPage(@RequestParam(required = false) Long courseId, Model model, HttpSession session) {
+        addCheckinModel(model, courseId, session);
         return "attendance-form";
     }
 
     @PostMapping("/checkin")
-    public String doCheckin(@RequestParam Long studentId,
+    public String doCheckin(@RequestParam(required = false) Long studentId,
                             @RequestParam Long courseId,
                             @RequestParam Integer seatRow,
                             @RequestParam Integer seatCol,
-                            Model model) {
+                            Model model,
+                            HttpSession session,
+                            HttpServletRequest request) {
         try {
+            User user = (User) session.getAttribute(AuthorizationInterceptor.SESSION_USER);
+            Long effectiveStudentId = user != null && "STUDENT".equalsIgnoreCase(user.getRole()) ? user.getId() : studentId;
+
             Attendance attendance = new Attendance();
-            attendance.setStudentId(studentId);
+            attendance.setStudentId(effectiveStudentId);
             attendance.setCourseId(courseId);
             attendance.setSeatRow(seatRow);
             attendance.setSeatCol(seatCol);
@@ -47,7 +55,7 @@ public class AttendancePageController {
             LocalDateTime now = LocalDateTime.now();
             attendance.setCheckInTime(Timestamp.valueOf(now));
             attendance.setCreateTime(Timestamp.valueOf(now));
-            attendance.setIp("127.0.0.1");
+            attendance.setIp(resolveClientIp(request));
 
             if (now.toLocalTime().isAfter(java.time.LocalTime.of(8, 30))) {
                 attendance.setStatus("LATE");
@@ -61,9 +69,21 @@ public class AttendancePageController {
         } catch (Exception e) {
             model.addAttribute("errorMsg", "打卡失败：" + e.getMessage());
         }
+        addCheckinModel(model, courseId, session);
+        return "attendance-form";
+    }
+
+    private void addCheckinModel(Model model, Long courseId, HttpSession session) {
+        User user = (User) session.getAttribute(AuthorizationInterceptor.SESSION_USER);
+        boolean student = user != null && "STUDENT".equalsIgnoreCase(user.getRole());
         model.addAttribute("courses", courseService.getAll());
         model.addAttribute("courseId", courseId);
-        return "attendance-form";
+        model.addAttribute("isStudent", student);
+        model.addAttribute("sessionUserId", student ? user.getId() : null);
+    }
+
+    private String resolveClientIp(HttpServletRequest request) {
+        return request.getRemoteAddr();
     }
 
     @GetMapping("/list")
@@ -108,13 +128,18 @@ public class AttendancePageController {
     @PostMapping("/import")
     public String importFile(@RequestParam("file") org.springframework.web.multipart.MultipartFile file,
                              org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
-        if (file.isEmpty() || (!file.getOriginalFilename().endsWith(".xlsx") && !file.getOriginalFilename().endsWith(".xls"))) {
+        String originalFilename = file.getOriginalFilename();
+        if (file.isEmpty() || originalFilename == null
+                || (!originalFilename.toLowerCase().endsWith(".xlsx") && !originalFilename.toLowerCase().endsWith(".xls"))) {
             redirectAttributes.addFlashAttribute("error", "无效文件！请上传 Excel 文件");
             return "redirect:/attendance/page/import";
         }
+        java.io.File dest = null;
         try {
-            java.io.File dest = new java.io.File(uploadPath + file.getOriginalFilename());
-            if(!dest.getParentFile().exists()) dest.getParentFile().mkdirs();
+            java.nio.file.Path uploadDirectory = java.nio.file.Path.of(uploadPath);
+            java.nio.file.Files.createDirectories(uploadDirectory);
+            String suffix = originalFilename.toLowerCase().endsWith(".xlsx") ? ".xlsx" : ".xls";
+            dest = java.nio.file.Files.createTempFile(uploadDirectory, "attendance-", suffix).toFile();
             file.transferTo(dest);
 
             ImportResult result = attendanceService.importFromExcel(dest);
@@ -126,6 +151,10 @@ public class AttendancePageController {
             redirectAttributes.addFlashAttribute("success", msg);
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "服务器解析异常: " + e.getMessage());
+        } finally {
+            if (dest != null && dest.exists() && !dest.delete()) {
+                dest.deleteOnExit();
+            }
         }
         return "redirect:/attendance/page/import";
     }

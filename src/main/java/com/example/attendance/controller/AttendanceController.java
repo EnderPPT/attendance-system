@@ -4,6 +4,9 @@ import com.example.attendance.dto.AttendanceQueryDTO;
 import com.example.attendance.common.Result;
 import com.example.attendance.entity.Attendance;
 import com.example.attendance.service.AttendanceService;
+import com.example.attendance.config.AuthorizationInterceptor;
+import com.example.attendance.entity.User;
+import jakarta.servlet.http.HttpSession;
 import com.example.attendance.dto.StatisticsDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +21,11 @@ public class AttendanceController {
     private AttendanceService attendanceService;
 
     @PostMapping("/create")
-    public Result<Attendance> create(@RequestBody Attendance attendance) {
+    public Result<Attendance> create(@RequestBody Attendance attendance, HttpSession session) {
+        User user = (User) session.getAttribute(AuthorizationInterceptor.SESSION_USER);
+        if (user != null && "STUDENT".equalsIgnoreCase(user.getRole())) {
+            attendance.setStudentId(user.getId());
+        }
         return Result.success(attendanceService.create(attendance));
     }
 

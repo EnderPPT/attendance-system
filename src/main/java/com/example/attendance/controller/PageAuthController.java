@@ -64,6 +64,8 @@ public class PageAuthController {
             return "register";
         }
 
+        username = username.trim();
+        realName = realName.trim();
         if (userService.existsByUsername(username)) {
             model.addAttribute("errorMsg", "用户名已存在");
             return "register";
@@ -95,19 +97,15 @@ public class PageAuthController {
             return "login";
         }
 
-        User user = userService.findByUsernameOrNull(username);
+        User user = userService.findByUsernameOrNull(username.trim());
 
-        if (user == null) {
-            model.addAttribute("errorMsg", "用户名不存在");
-            return "login";
-        }
-
-        if (!passwordEncoder.matches(password, user.getPassword())) {
+        if (user == null || !passwordEncoder.matches(password, user.getPassword())) {
             model.addAttribute("errorMsg", "用户名或密码错误");
             return "login";
         }
 
-        session.setAttribute(AuthorizationInterceptor.SESSION_USER, user);
+        session.setAttribute(AuthorizationInterceptor.SESSION_USER,
+                new User(user.getId(), user.getUsername(), null, user.getRealName(), user.getRole(), user.getCreateTime()));
         return "redirect:/dashboard";
     }
 
