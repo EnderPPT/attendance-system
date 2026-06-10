@@ -8,6 +8,7 @@ import com.example.attendance.entity.Course;
 import com.example.attendance.exception.BusinessException;
 import com.example.attendance.repository.AttendanceRepository;
 import com.example.attendance.repository.CourseRepository;
+import com.example.attendance.repository.CourseSelectionRepository;
 import com.example.attendance.service.AttendanceService;
 import jakarta.persistence.criteria.Predicate;
 import org.apache.poi.ss.usermodel.*;
@@ -19,22 +20,27 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
 @Service
 public class AttendanceServiceImpl implements AttendanceService {
-    private static final Set<String> ALLOWED_STATUSES = Set.of("NORMAL", "LATE", "EARLY", "ABSENT");
+    private static final Set<String> ALLOWED_STATUSES = Set.of("NORMAL", "LATE", "EARLY", "ABSENT", "LEAVE");
     private static final Set<String> ALLOWED_SORT_FIELDS = Set.of("id", "courseId", "studentId", "checkInTime", "status", "createTime");
     private static final int MAX_PAGE_SIZE = 100;
 
     private final AttendanceRepository attendanceRepository;
     private final CourseRepository courseRepository;
+    private final CourseSelectionRepository courseSelectionRepository;
 
-    public AttendanceServiceImpl(AttendanceRepository attendanceRepository, CourseRepository courseRepository) {
+    public AttendanceServiceImpl(AttendanceRepository attendanceRepository,
+                                 CourseRepository courseRepository,
+                                 CourseSelectionRepository courseSelectionRepository) {
         this.attendanceRepository = attendanceRepository;
         this.courseRepository = courseRepository;
+        this.courseSelectionRepository = courseSelectionRepository;
     }
 
     @Override
@@ -48,12 +54,18 @@ public class AttendanceServiceImpl implements AttendanceService {
 
         Course course = courseRepository.findById(attendance.getCourseId())
                 .orElseThrow(() -> new BusinessException("课程不存在"));
+        if (!courseSelectionRepository.existsByCourseIdAndStudentId(attendance.getCourseId(), attendance.getStudentId())) {
+            throw new BusinessException("该学生未选该课程，无法打卡");
+        }
         validateSeat(course, attendance.getSeatRow(), attendance.getSeatCol());
 
         Timestamp checkInTime = attendance.getCheckInTime();
         if (checkInTime == null) {
             checkInTime = new Timestamp(System.currentTimeMillis());
             attendance.setCheckInTime(checkInTime);
+        }
+        if (attendance.getStatus() == null || attendance.getStatus().trim().isEmpty()) {
+            attendance.setStatus(resolveStatus(course, checkInTime));
         }
         normalizeStatus(attendance);
 
@@ -198,9 +210,31 @@ public class AttendanceServiceImpl implements AttendanceService {
         }
         String normalized = status.trim().toUpperCase();
         if (!ALLOWED_STATUSES.contains(normalized)) {
-            throw new BusinessException("考勤状态必须为 NORMAL、LATE、EARLY 或 ABSENT");
+            throw new BusinessException("考勤状态必须为 NORMAL、LATE、EARLY、ABSENT 或 LEAVE");
         }
         attendance.setStatus(normalized);
+    }
+
+    private String resolveStatus(Course course, Timestamp checkInTime) {
+        LocalTime start = course.getStartTime();
+        LocalTime end = course.getEndTime();
+        if (start == null || end == null) {
+            return "NORMAL";
+        }
+        int threshold = course.getLateThresholdMinutes() == null ? 15 : course.getLateThresholdMinutes();
+        LocalTime lateLine = start.plusMinutes(threshold);
+        LocalTime now = checkInTime.toLocalDateTime().toLocalTime();
+
+        if (now.isBefore(start)) {
+            return "NORMAL";
+        }
+        if (!now.isAfter(lateLine)) {
+            return "NORMAL";
+        }
+        if (now.isBefore(end)) {
+            return "LATE";
+        }
+        return "ABSENT";
     }
 
     private Timestamp parseTimestamp(String value, String fieldName) {

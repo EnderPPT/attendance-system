@@ -20,9 +20,14 @@ public class PageAuthController {
     private PasswordEncoder passwordEncoder;
 
     @GetMapping("/login")
-    public String loginPage(@RequestParam(required = false) String registered, Model model) {
+    public String loginPage(@RequestParam(required = false) String registered,
+                            @RequestParam(required = false) String passwordChanged,
+                            Model model) {
         if ("true".equals(registered)) {
             model.addAttribute("successMsg", "注册成功，请登录");
+        }
+        if ("true".equals(passwordChanged)) {
+            model.addAttribute("successMsg", "密码修改成功，请使用新密码登录");
         }
         return "login";
     }
@@ -105,7 +110,10 @@ public class PageAuthController {
         }
 
         session.setAttribute(AuthorizationInterceptor.SESSION_USER,
-                new User(user.getId(), user.getUsername(), null, user.getRealName(), user.getRole(), user.getCreateTime()));
+                new User(user.getId(), user.getUsername(), null, user.getRealName(), user.getRole(), user.getMustChangePassword(), user.getCreateTime()));
+        if (Boolean.TRUE.equals(user.getMustChangePassword())) {
+            return "redirect:/page/password?firstLogin=true";
+        }
         return "redirect:/dashboard";
     }
 
@@ -127,5 +135,55 @@ public class PageAuthController {
     public String logout(HttpSession session) {
         session.invalidate();
         return "redirect:/login";
+    }
+
+    @GetMapping("/page/password")
+    public String passwordPage(@RequestParam(required = false) String firstLogin, Model model) {
+        if ("true".equals(firstLogin)) {
+            model.addAttribute("firstLogin", true);
+        }
+        return "password";
+    }
+
+    @PostMapping("/page/password")
+    public String changePassword(@RequestParam String oldPassword,
+                                 @RequestParam String newPassword,
+                                 @RequestParam String confirmPassword,
+                                 Model model,
+                                 HttpSession session) {
+        User sessionUser = (User) session.getAttribute(AuthorizationInterceptor.SESSION_USER);
+        if (sessionUser == null) {
+            return "redirect:/login";
+        }
+        if (oldPassword == null || oldPassword.trim().isEmpty()
+                || newPassword == null || newPassword.trim().isEmpty()
+                || confirmPassword == null || confirmPassword.trim().isEmpty()) {
+            model.addAttribute("errorMsg", "请填写完整的新旧密码");
+            return "password";
+        }
+        if (!newPassword.equals(confirmPassword)) {
+            model.addAttribute("errorMsg", "两次输入的新密码不一致");
+            return "password";
+        }
+        if (newPassword.length() < 6) {
+            model.addAttribute("errorMsg", "新密码长度不能少于 6 位");
+            return "password";
+        }
+        if (newPassword.equals(oldPassword)) {
+            model.addAttribute("errorMsg", "新密码不能与旧密码相同");
+            return "password";
+        }
+
+        User current = userService.findById(sessionUser.getId());
+        if (current == null || !passwordEncoder.matches(oldPassword, current.getPassword())) {
+            model.addAttribute("errorMsg", "旧密码不正确");
+            return "password";
+        }
+
+        current.setPassword(passwordEncoder.encode(newPassword));
+        current.setMustChangePassword(false);
+        userService.updateUser(current);
+        session.invalidate();
+        return "redirect:/login?passwordChanged=true";
     }
 }

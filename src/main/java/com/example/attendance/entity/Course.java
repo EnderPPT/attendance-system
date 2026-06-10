@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.sql.Timestamp;
+import java.time.LocalTime;
 
 @Data
 @AllArgsConstructor
@@ -44,6 +45,15 @@ public class Course {
 
     @Column(name = "weekday")
     private Integer weekday;
+
+    @Column(name = "start_time")
+    private LocalTime startTime;
+
+    @Column(name = "end_time")
+    private LocalTime endTime;
+
+    @Column(name = "late_threshold_minutes")
+    private Integer lateThresholdMinutes;
 
     @Column(name = "start_week")
     private Integer startWeek;

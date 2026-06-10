@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>我的请假</title><link rel="stylesheet" th:href="@{/css/style.css}"></head>
+<body><div class="app-page"><nav class="page-nav"><a class="active" href="/dashboard">首页</a></nav>
+<section class="hero-card"><div class="hero-content"><div><div class="eyebrow">📒 MY LEAVES</div><h1 class="hero-title">我的请假</h1><p class="hero-desc">查看你提交的请假申请及审批状态。</p></div><a class="btn btn-add" href="/leave/page/apply">＋ 提交请假</a></div></section>
+<section class="panel">
+<p th:if="${success}" class="success" th:text="${success}"></p>
+<div class="table-wrap"><table>
+<thead><tr><th>ID</th><th>课程</th><th>请假时间</th><th>原因</th><th>状态</th><th>审批备注</th></tr></thead>
+<tbody>
+<tr th:if="${#lists.isEmpty(applications)}"><td colspan="6" class="empty">暂无请假记录。</td></tr>
+<tr th:each="item : ${applications}">
+<td th:text="${item.id}"></td>
+<td th:text="${courseMap[item.courseId] != null ? courseMap[item.courseId].courseName : '课程 #' + item.courseId}"></td>
+<td><span th:text="${item.startTime}"></span><br><span th:text="${item.endTime}"></span></td>
+<td class="reason-cell" th:text="${item.reason}"></td>
+<td><span class="status-badge" th:classappend="${item.status.toLowerCase()}" th:text="${item.status == 'PENDING' ? '待审批' : (item.status == 'APPROVED' ? '已通过' : '已驳回')}"></span></td>
+<td th:text="${item.approverRemark != null ? item.approverRemark : ''}"></td>
+</tr>
+</tbody>
+</table></div>
+</section></div></body></html>

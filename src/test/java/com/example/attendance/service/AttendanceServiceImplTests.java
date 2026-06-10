@@ -5,6 +5,7 @@ import com.example.attendance.entity.Course;
 import com.example.attendance.exception.BusinessException;
 import com.example.attendance.repository.AttendanceRepository;
 import com.example.attendance.repository.CourseRepository;
+import com.example.attendance.repository.CourseSelectionRepository;
 import com.example.attendance.service.impl.AttendanceServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,12 +27,15 @@ class AttendanceServiceImplTests {
     private AttendanceRepository attendanceRepository;
     @Mock
     private CourseRepository courseRepository;
+    @Mock
+    private CourseSelectionRepository courseSelectionRepository;
 
     private AttendanceServiceImpl attendanceService;
 
     @BeforeEach
     void setUp() {
-        attendanceService = new AttendanceServiceImpl(attendanceRepository, courseRepository);
+        attendanceService = new AttendanceServiceImpl(attendanceRepository, courseRepository, courseSelectionRepository);
+        lenient().when(courseSelectionRepository.existsByCourseIdAndStudentId(any(), any())).thenReturn(true);
     }
 
     @Test

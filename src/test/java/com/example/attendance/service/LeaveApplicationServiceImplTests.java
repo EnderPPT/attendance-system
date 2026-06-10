@@ -3,6 +3,7 @@ package com.example.attendance.service;
 import com.example.attendance.dto.LeaveApplicationRequest;
 import com.example.attendance.entity.LeaveApplication;
 import com.example.attendance.exception.BusinessException;
+import com.example.attendance.repository.AttendanceRepository;
 import com.example.attendance.repository.CourseRepository;
 import com.example.attendance.repository.LeaveApplicationRepository;
 import com.example.attendance.service.impl.LeaveApplicationServiceImpl;
@@ -24,12 +25,14 @@ class LeaveApplicationServiceImplTests {
     private LeaveApplicationRepository leaveApplicationRepository;
     @Mock
     private CourseRepository courseRepository;
+    @Mock
+    private AttendanceRepository attendanceRepository;
 
     private LeaveApplicationServiceImpl leaveApplicationService;
 
     @BeforeEach
     void setUp() {
-        leaveApplicationService = new LeaveApplicationServiceImpl(leaveApplicationRepository, courseRepository);
+        leaveApplicationService = new LeaveApplicationServiceImpl(leaveApplicationRepository, courseRepository, attendanceRepository);
     }
 
     @Test

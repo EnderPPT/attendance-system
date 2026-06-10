@@ -36,6 +36,7 @@
                     <option value="LATE" th:selected="${status == 'LATE'}">迟到 (LATE)</option>
                     <option value="EARLY" th:selected="${status == 'EARLY'}">早退 (EARLY)</option>
                     <option value="ABSENT" th:selected="${status == 'ABSENT'}">缺勤 (ABSENT)</option>
+                    <option value="LEAVE" th:selected="${status == 'LEAVE'}">请假 (LEAVE)</option>
                 </select>
             </div>
             <div class="field">
@@ -76,13 +77,17 @@
                     <td th:text="${record.studentId}"></td>
                     <td><span th:text="${record.courseId}"></span></td>
                     <td th:text="${#calendars.format(record.checkInTime, 'yyyy-MM-dd HH:mm:ss')}"></td>
-                    <td th:text="${record.seatRow} + '排' + ${record.seatCol} + '列'"></td>
+                    <td>
+                        <span th:if="${record.status == 'LEAVE'}" style="color:#94a3b8;">—</span>
+                        <span th:unless="${record.status == 'LEAVE'}" th:text="${record.seatRow} + '排' + ${record.seatCol} + '列'"></span>
+                    </td>
                     <td>
                         <!-- 根据状态显示不同颜色徽章 -->
                         <span th:if="${record.status == 'NORMAL'}" class="badge badge-success">正常</span>
                         <span th:if="${record.status == 'LATE'}" class="badge badge-error">迟到</span>
                         <span th:if="${record.status == 'EARLY'}" class="badge badge-error">早退</span>
                         <span th:if="${record.status == 'ABSENT'}" class="badge" style="background:gray;color:white;">缺勤</span>
+                        <span th:if="${record.status == 'LEAVE'}" class="badge" style="background:#3b82f6;color:white;">请假</span>
                     </td>
                 </tr>
                 </tbody>

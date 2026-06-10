@@ -14,5 +14,6 @@ public class User {
     private String password;
     private String realName;
     private String role;
+    private Boolean mustChangePassword;
     private Timestamp createTime;
 }

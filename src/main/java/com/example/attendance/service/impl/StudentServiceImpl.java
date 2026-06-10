@@ -1,29 +1,42 @@
 package com.example.attendance.service.impl;
 
+import com.example.attendance.dao.UserDao;
 import com.example.attendance.dto.ImportResult;
 import com.example.attendance.entity.Student;
+import com.example.attendance.entity.User;
 import com.example.attendance.repository.StudentRepository;
 import com.example.attendance.service.StudentService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.data.domain.Sort;
 import org.apache.poi.ss.usermodel.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 
-import java.io.FileInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.util.List;
 
 @Service
 public class StudentServiceImpl implements StudentService {
+    public static final String DEFAULT_PASSWORD = "123456";
+
     @Autowired
     private StudentRepository studentRepository;
+
+    @Autowired
+    private UserDao userDao;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Override
     public Student createStudent(Student student) {
         if (student.getStudentId() == null || student.getStudentId().trim().isEmpty()) {
             throw new RuntimeException("学号不能为空");
         }
-        return studentRepository.save(student);
+        Student saved = studentRepository.save(student);
+        ensureStudentAccount(saved);
+        return saved;
     }
 
     @Override
@@ -84,33 +97,30 @@ public class StudentServiceImpl implements StudentService {
              Workbook workbook = WorkbookFactory.create(fis)) {
 
             Sheet sheet = workbook.getSheetAt(0);
-            // 跳过第一行表头，从第二行开始读
             for (int i = 1; i <= sheet.getLastRowNum(); i++) {
                 Row row = sheet.getRow(i);
                 if (row == null) continue;
 
                 try {
-                    // 根据你发的图片，提取指定列
-                    String studentId = getCellValue(row.getCell(0)); // 学号
-                    String name = getCellValue(row.getCell(1));      // 姓名
-                    String gender = getCellValue(row.getCell(2));    // 性别
-                    String className = getCellValue(row.getCell(6)); // 班级 (图片中的第7列，索引为6)
+                    String studentId = getCellValue(row.getCell(0));
+                    String name = getCellValue(row.getCell(1));
+                    String gender = getCellValue(row.getCell(2));
+                    String className = getCellValue(row.getCell(6));
 
                     if (studentId.isEmpty() || name.isEmpty()) {
                         result.incrementFail("第" + (i + 1) + "行：学号或姓名为空");
                         continue;
                     }
 
-                    // 创建并填充学生对象
                     Student student = new Student();
                     student.setStudentId(studentId);
                     student.setName(name);
                     student.setGender(gender);
-                    // 默认没填的部分给个初始值防止报错
                     student.setClassName(className.isEmpty() ? "默认班级" : className);
-                    student.setAge(18); // 默认年龄
+                    student.setAge(18);
 
                     studentRepository.save(student);
+                    ensureStudentAccount(student);
                     result.incrementSuccess();
                 } catch (Exception e) {
                     result.incrementFail("第" + (i + 1) + "行异常：" + e.getMessage());
@@ -122,12 +132,28 @@ public class StudentServiceImpl implements StudentService {
         return result;
     }
 
+    private void ensureStudentAccount(Student student) {
+        if (student.getStudentId() == null || student.getStudentId().trim().isEmpty()) {
+            return;
+        }
+        String username = student.getStudentId().trim();
+        if (userDao.existsByUsername(username)) {
+            return;
+        }
+        User user = new User();
+        user.setUsername(username);
+        user.setPassword(passwordEncoder.encode(DEFAULT_PASSWORD));
+        user.setRealName(student.getName() == null ? username : student.getName());
+        user.setRole("STUDENT");
+        user.setMustChangePassword(true);
+        userDao.insertUser(user);
+    }
+
     private String getCellValue(Cell cell) {
         if (cell == null) return "";
         switch (cell.getCellType()) {
             case STRING: return cell.getStringCellValue().trim();
             case NUMERIC:
-                // 避免学号等数字带小数点，如 42211127.0
                 return String.valueOf((long)cell.getNumericCellValue());
             default: return "";
         }

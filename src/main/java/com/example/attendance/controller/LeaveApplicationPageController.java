@@ -1,10 +1,14 @@
 package com.example.attendance.controller;
 
+import com.example.attendance.config.AuthorizationInterceptor;
 import com.example.attendance.dto.LeaveApplicationRequest;
 import com.example.attendance.entity.Course;
 import com.example.attendance.entity.LeaveApplication;
+import com.example.attendance.entity.User;
+import com.example.attendance.service.CourseSelectionService;
 import com.example.attendance.service.CourseService;
 import com.example.attendance.service.LeaveApplicationService;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,10 +28,14 @@ import java.util.stream.Collectors;
 public class LeaveApplicationPageController {
     private final LeaveApplicationService leaveApplicationService;
     private final CourseService courseService;
+    private final CourseSelectionService courseSelectionService;
 
-    public LeaveApplicationPageController(LeaveApplicationService leaveApplicationService, CourseService courseService) {
+    public LeaveApplicationPageController(LeaveApplicationService leaveApplicationService,
+                                          CourseService courseService,
+                                          CourseSelectionService courseSelectionService) {
         this.leaveApplicationService = leaveApplicationService;
         this.courseService = courseService;
+        this.courseSelectionService = courseSelectionService;
     }
 
     @GetMapping("/list")
@@ -57,24 +65,60 @@ public class LeaveApplicationPageController {
         return "leave-list";
     }
 
+    @GetMapping("/my")
+    public String myList(Model model, HttpSession session) {
+        User user = (User) session.getAttribute(AuthorizationInterceptor.SESSION_USER);
+        List<LeaveApplication> applications = user == null
+                ? java.util.List.of()
+                : leaveApplicationService.getByStudentId(user.getId());
+        List<Course> courses = courseService.getAll();
+        Map<Long, Course> courseMap = courses.stream()
+                .collect(Collectors.toMap(Course::getCourseId, Function.identity()));
+        model.addAttribute("applications", applications);
+        model.addAttribute("courseMap", courseMap);
+        return "leave-my";
+    }
+
     @GetMapping("/apply")
-    public String applyPage(@RequestParam(required = false) Long courseId, Model model) {
+    public String applyPage(@RequestParam(required = false) Long courseId, Model model, HttpSession session) {
+        User user = (User) session.getAttribute(AuthorizationInterceptor.SESSION_USER);
+        boolean student = user != null && "STUDENT".equalsIgnoreCase(user.getRole());
         LeaveApplicationRequest request = new LeaveApplicationRequest();
         request.setCourseId(courseId);
+        if (student) {
+            request.setStudentId(user.getId());
+        }
         model.addAttribute("request", request);
-        model.addAttribute("courses", courseService.getAll());
+        if (student) {
+            model.addAttribute("courses", courseSelectionService.getCoursesByStudent(user.getId()));
+        } else {
+            model.addAttribute("courses", courseService.getAll());
+        }
+        model.addAttribute("isStudent", student);
+        model.addAttribute("sessionUserId", student ? user.getId() : null);
         return "leave-form";
     }
 
     @PostMapping("/apply")
-    public String apply(LeaveApplicationRequest request, Model model, RedirectAttributes redirectAttributes) {
+    public String apply(LeaveApplicationRequest request, Model model, RedirectAttributes redirectAttributes, HttpSession session) {
+        User user = (User) session.getAttribute(AuthorizationInterceptor.SESSION_USER);
+        boolean student = user != null && "STUDENT".equalsIgnoreCase(user.getRole());
+        if (student) {
+            request.setStudentId(user.getId());
+        }
         try {
             leaveApplicationService.apply(request);
             redirectAttributes.addFlashAttribute("success", "请假申请提交成功，等待审批");
-            return "redirect:/leave/page/list?studentId=" + request.getStudentId();
+            return student ? "redirect:/leave/page/my" : "redirect:/leave/page/list?studentId=" + request.getStudentId();
         } catch (Exception e) {
             model.addAttribute("request", request);
-            model.addAttribute("courses", courseService.getAll());
+            if (student) {
+                model.addAttribute("courses", courseSelectionService.getCoursesByStudent(user.getId()));
+            } else {
+                model.addAttribute("courses", courseService.getAll());
+            }
+            model.addAttribute("isStudent", student);
+            model.addAttribute("sessionUserId", student ? user.getId() : null);
             model.addAttribute("error", e.getMessage());
             return "leave-form";
         }

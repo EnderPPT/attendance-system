@@ -12,39 +12,45 @@ import java.util.List;
 @Repository
 public class UserDao {
 
+    private static final String SELECT_COLUMNS =
+            "id, username, password, real_name as realName, role, " +
+            "must_change_password as mustChangePassword, create_time as createTime";
+
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
     public void insertUser(User user) {
-        String sql = "INSERT INTO sys_user (username, password, real_name, role) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO sys_user (username, password, real_name, role, must_change_password) VALUES (?, ?, ?, ?, ?)";
         jdbcTemplate.update(sql,
                 user.getUsername(),
                 user.getPassword(),
                 user.getRealName(),
-                user.getRole());
+                user.getRole(),
+                user.getMustChangePassword() != null && user.getMustChangePassword());
     }
 
     public User findById(Long id) {
-        String sql = "SELECT id, username, password, real_name as realName, role, create_time as createTime FROM sys_user WHERE id = ?";
+        String sql = "SELECT " + SELECT_COLUMNS + " FROM sys_user WHERE id = ?";
         return jdbcTemplate.queryForObject(sql, new BeanPropertyRowMapper<>(User.class), id);
     }
 
     public User findByUsername(String username) {
-        String sql = "SELECT id, username, password, real_name as realName, role, create_time as createTime FROM sys_user WHERE username = ?";
+        String sql = "SELECT " + SELECT_COLUMNS + " FROM sys_user WHERE username = ?";
         return jdbcTemplate.queryForObject(sql, new BeanPropertyRowMapper<>(User.class), username);
     }
 
     public List<User> findAllTeachers() {
-        String sql = "SELECT id, username, password, real_name as realName, role, create_time as createTime FROM sys_user WHERE role = 'TEACHER'";
+        String sql = "SELECT " + SELECT_COLUMNS + " FROM sys_user WHERE role = 'TEACHER'";
         return jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(User.class));
     }
 
     public void updateUser(User user) {
-        String sql = "UPDATE sys_user SET password = ?, real_name = ?, role = ? WHERE id = ?";
+        String sql = "UPDATE sys_user SET password = ?, real_name = ?, role = ?, must_change_password = ? WHERE id = ?";
         jdbcTemplate.update(sql,
                 user.getPassword(),
                 user.getRealName(),
                 user.getRole(),
+                user.getMustChangePassword() != null && user.getMustChangePassword(),
                 user.getId()
         );
     }
@@ -55,7 +61,7 @@ public class UserDao {
     }
 
     public User findByUsernameOrNull(String username) {
-        String sql = "SELECT id, username, password, real_name as realName, role, create_time as createTime FROM sys_user WHERE username = ?";
+        String sql = "SELECT " + SELECT_COLUMNS + " FROM sys_user WHERE username = ?";
         try {
             return jdbcTemplate.queryForObject(sql, new BeanPropertyRowMapper<>(User.class), username);
         } catch (EmptyResultDataAccessException e) {

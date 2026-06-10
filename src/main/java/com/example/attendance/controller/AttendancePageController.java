@@ -4,6 +4,7 @@ import com.example.attendance.dto.AttendanceQueryDTO;
 import com.example.attendance.dto.ImportResult;
 import com.example.attendance.entity.Attendance;
 import com.example.attendance.service.AttendanceService;
+import com.example.attendance.service.CourseSelectionService;
 import com.example.attendance.service.CourseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,6 +28,9 @@ public class AttendancePageController {
 
     @Autowired
     private CourseService courseService;
+
+    @Autowired
+    private CourseSelectionService courseSelectionService;
 
     @GetMapping("/checkin")
     public String checkinPage(@RequestParam(required = false) Long courseId, Model model, HttpSession session) {
@@ -57,15 +61,16 @@ public class AttendancePageController {
             attendance.setCreateTime(Timestamp.valueOf(now));
             attendance.setIp(resolveClientIp(request));
 
-            if (now.toLocalTime().isAfter(java.time.LocalTime.of(8, 30))) {
-                attendance.setStatus("LATE");
-            } else {
-                attendance.setStatus("NORMAL");
-            }
-
             attendanceService.create(attendance);
 
-            model.addAttribute("successMsg", "打卡成功！当前状态为：" + (attendance.getStatus().equals("LATE") ? "迟到" : "正常"));
+            String statusText = switch (attendance.getStatus()) {
+                case "LATE" -> "迟到";
+                case "ABSENT" -> "旷课（已超过下课时间）";
+                case "EARLY" -> "早退";
+                case "LEAVE" -> "请假";
+                default -> "正常";
+            };
+            model.addAttribute("successMsg", "打卡成功！当前状态为：" + statusText);
         } catch (Exception e) {
             model.addAttribute("errorMsg", "打卡失败：" + e.getMessage());
         }
@@ -76,7 +81,11 @@ public class AttendancePageController {
     private void addCheckinModel(Model model, Long courseId, HttpSession session) {
         User user = (User) session.getAttribute(AuthorizationInterceptor.SESSION_USER);
         boolean student = user != null && "STUDENT".equalsIgnoreCase(user.getRole());
-        model.addAttribute("courses", courseService.getAll());
+        if (student) {
+            model.addAttribute("courses", courseSelectionService.getCoursesByStudent(user.getId()));
+        } else {
+            model.addAttribute("courses", courseService.getAll());
+        }
         model.addAttribute("courseId", courseId);
         model.addAttribute("isStudent", student);
         model.addAttribute("sessionUserId", student ? user.getId() : null);

@@ -1,14 +1,18 @@
 package com.example.attendance.service.impl;
 
 import com.example.attendance.dto.LeaveApplicationRequest;
+import com.example.attendance.entity.Attendance;
 import com.example.attendance.entity.LeaveApplication;
 import com.example.attendance.exception.BusinessException;
+import com.example.attendance.repository.AttendanceRepository;
 import com.example.attendance.repository.CourseRepository;
 import com.example.attendance.repository.LeaveApplicationRepository;
 import com.example.attendance.service.LeaveApplicationService;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -20,11 +24,14 @@ public class LeaveApplicationServiceImpl implements LeaveApplicationService {
 
     private final LeaveApplicationRepository leaveApplicationRepository;
     private final CourseRepository courseRepository;
+    private final AttendanceRepository attendanceRepository;
 
     public LeaveApplicationServiceImpl(LeaveApplicationRepository leaveApplicationRepository,
-                                       CourseRepository courseRepository) {
+                                       CourseRepository courseRepository,
+                                       AttendanceRepository attendanceRepository) {
         this.leaveApplicationRepository = leaveApplicationRepository;
         this.courseRepository = courseRepository;
+        this.attendanceRepository = attendanceRepository;
     }
 
     @Override
@@ -54,7 +61,40 @@ public class LeaveApplicationServiceImpl implements LeaveApplicationService {
         application.setStatus(approved ? APPROVED : REJECTED);
         application.setApprovalTime(LocalDateTime.now());
         application.setApproverRemark(remark == null ? null : remark.trim());
-        return leaveApplicationRepository.save(application);
+        LeaveApplication saved = leaveApplicationRepository.save(application);
+        if (approved) {
+            writeLeaveAttendance(saved);
+        }
+        return saved;
+    }
+
+    private void writeLeaveAttendance(LeaveApplication application) {
+        LocalDate start = application.getStartTime().toLocalDate();
+        LocalDate end = application.getEndTime().toLocalDate();
+        for (LocalDate day = start; !day.isAfter(end); day = day.plusDays(1)) {
+            Timestamp dayStart = Timestamp.valueOf(day.atStartOfDay());
+            Timestamp nextDayStart = Timestamp.valueOf(day.plusDays(1).atStartOfDay());
+            boolean exists = attendanceRepository
+                    .existsByCourseIdAndStudentIdAndCheckInTimeGreaterThanEqualAndCheckInTimeLessThan(
+                            application.getCourseId(), application.getStudentId(), dayStart, nextDayStart);
+            if (exists) {
+                continue;
+            }
+            Attendance attendance = new Attendance();
+            attendance.setCourseId(application.getCourseId());
+            attendance.setStudentId(application.getStudentId());
+            attendance.setCheckInTime(Timestamp.valueOf(day.atTime(0, 0)));
+            attendance.setSeatRow(-1);
+            int seatCol = -(int) Math.floorMod(application.getStudentId(), 30000);
+            if (seatCol == 0) {
+                seatCol = -1;
+            }
+            attendance.setSeatCol(seatCol);
+            attendance.setStatus("LEAVE");
+            attendance.setIp("LEAVE-APPROVED");
+            attendance.setCreateTime(new Timestamp(System.currentTimeMillis()));
+            attendanceRepository.save(attendance);
+        }
     }
 
     @Override

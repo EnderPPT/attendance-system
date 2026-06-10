@@ -18,8 +18,16 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
     private static final Set<String> STUDENT_ALLOWED_PATHS = Set.of(
             "/dashboard",
             "/page/logout",
+            "/page/password",
             "/attendance/page/checkin",
-            "/attendance/create"
+            "/attendance/create",
+            "/leave/page/apply",
+            "/leave/page/my",
+            "/selection/page/my"
+    );
+
+    private static final Set<String> STUDENT_ALLOWED_PREFIXES = Set.of(
+            "/seat/"
     );
 
     @Override
@@ -31,11 +39,31 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
             return reject(request, response, HttpServletResponse.SC_UNAUTHORIZED, "请先登录");
         }
 
-        if (!hasManagerRole(user) && !STUDENT_ALLOWED_PATHS.contains(request.getServletPath())) {
+        String path = request.getServletPath();
+        if (Boolean.TRUE.equals(user.getMustChangePassword())
+                && !"/page/password".equals(path)
+                && !"/page/logout".equals(path)) {
+            response.sendRedirect(request.getContextPath() + "/page/password?firstLogin=true");
+            return false;
+        }
+
+        if (!hasManagerRole(user) && !isStudentAllowed(path)) {
             return reject(request, response, HttpServletResponse.SC_FORBIDDEN, "学生账号只能使用考勤打卡功能");
         }
 
         return true;
+    }
+
+    private boolean isStudentAllowed(String path) {
+        if (STUDENT_ALLOWED_PATHS.contains(path)) {
+            return true;
+        }
+        for (String prefix : STUDENT_ALLOWED_PREFIXES) {
+            if (path.startsWith(prefix)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean hasManagerRole(User user) {

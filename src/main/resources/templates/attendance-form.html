@@ -5,6 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>学生考勤打卡</title>
     <link rel="stylesheet" href="/css/style.css" th:href="@{/css/style.css}">
+    <style>
+        .seat-board { background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:16px; margin:10px 0; }
+        .seat-podium { text-align:center; background:#1e293b; color:#fff; padding:6px; border-radius:6px; margin-bottom:14px; letter-spacing:4px; font-size:13px; }
+        .seat-grid { display:grid; gap:6px; justify-content:center; }
+        .seat { width:36px; height:36px; border-radius:6px; border:1px solid #cbd5e1; display:flex; align-items:center; justify-content:center; font-size:11px; cursor:pointer; user-select:none; background:#fff; transition:transform .1s; }
+        .seat:hover:not(.seat-disabled):not(.seat-occupied) { transform:scale(1.08); border-color:#3b82f6; }
+        .seat-occupied { background:#fecaca; color:#991b1b; cursor:not-allowed; border-color:#fca5a5; }
+        .seat-disabled { background:#e2e8f0; color:#94a3b8; cursor:not-allowed; border-color:#cbd5e1; }
+        .seat-selected { background:#22c55e; color:#fff; border-color:#16a34a; font-weight:bold; }
+        .seat-legend { display:flex; gap:18px; justify-content:center; margin-top:14px; font-size:12px; color:#475569; flex-wrap:wrap; }
+        .seat-legend span { display:flex; align-items:center; gap:6px; }
+        .seat-legend i { display:inline-block; width:14px; height:14px; border-radius:3px; border:1px solid #cbd5e1; }
+        .seat-row-label { color:#94a3b8; font-size:11px; padding-right:6px; }
+        .seat-hint { text-align:center; color:#64748b; padding:30px; }
+    </style>
 </head>
 <body>
 <div class="app-page">
@@ -14,7 +29,7 @@
             <div>
                 <div class="eyebrow">✨ CHECK IN</div>
                 <h1 class="hero-title">考勤打卡大厅</h1>
-                <p class="hero-desc">在此处完成相关课程的考勤提交。系统将自动记录并判定考勤时间状态。</p>
+                <p class="hero-desc">选择课程后，在座位图上点击你要坐的位置，系统会自动判定打卡状态。</p>
             </div>
             <a href="/dashboard" class="btn btn-add">返回首页</a>
         </div>
@@ -24,7 +39,7 @@
         <p th:if="${errorMsg}" class="error" th:text="${errorMsg}"></p>
         <p th:if="${successMsg}" class="success" th:text="${successMsg}"></p>
 
-        <form th:action="@{/attendance/page/checkin}" method="post">
+        <form th:action="@{/attendance/page/checkin}" method="post" id="checkinForm">
             <div class="form-grid">
                 <div class="form-group full">
                     <label>学生 ID</label>
@@ -35,30 +50,132 @@
 
                 <div class="form-group full">
                     <label>课程</label>
-                    <select name="courseId" required>
+                    <select name="courseId" id="courseSelect" required>
                         <option value="">请选择课程</option>
                         <option th:each="course : ${courses}" th:value="${course.courseId}"
                                 th:selected="${course.courseId == courseId}"
                                 th:text="${course.courseCode + ' · ' + course.courseName + ' · ' + course.className}"></option>
                     </select>
                 </div>
+            </div>
 
-                <div class="form-group">
-                    <label>座位排数</label>
-                    <input type="number" name="seatRow" placeholder="例如: 3" required>
-                </div>
-
-                <div class="form-group">
-                    <label>座位列数</label>
-                    <input type="number" name="seatCol" placeholder="例如: 5" required>
+            <div class="seat-board">
+                <div class="seat-podium" id="seatPodium">— 请先选择课程 —</div>
+                <div id="seatGrid" class="seat-hint">选择课程后将显示该教室的座位图</div>
+                <div class="seat-legend">
+                    <span><i style="background:#fff"></i>可选</span>
+                    <span><i style="background:#22c55e;border-color:#16a34a"></i>已选中</span>
+                    <span><i style="background:#fecaca;border-color:#fca5a5"></i>已占用</span>
+                    <span><i style="background:#e2e8f0"></i>不可用</span>
                 </div>
             </div>
 
+            <input type="hidden" name="seatRow" id="seatRow" required>
+            <input type="hidden" name="seatCol" id="seatCol" required>
+            <p style="text-align:center;color:#475569;margin:6px 0;" id="seatSummary">尚未选择座位</p>
+
             <div class="btn-row">
-                <button type="submit" class="btn btn-primary btn-block">⚡ 立即提交打卡</button>
+                <button type="submit" class="btn btn-primary btn-block" id="submitBtn" disabled>⚡ 立即提交打卡</button>
             </div>
         </form>
     </section>
 </div>
+
+<script th:inline="javascript">
+(function () {
+    const courseSelect = document.getElementById('courseSelect');
+    const grid = document.getElementById('seatGrid');
+    const podium = document.getElementById('seatPodium');
+    const rowInput = document.getElementById('seatRow');
+    const colInput = document.getElementById('seatCol');
+    const summary = document.getElementById('seatSummary');
+    const submitBtn = document.getElementById('submitBtn');
+
+    function reset() {
+        rowInput.value = '';
+        colInput.value = '';
+        summary.textContent = '尚未选择座位';
+        submitBtn.disabled = true;
+    }
+
+    function loadLayout(courseId) {
+        if (!courseId) {
+            grid.className = 'seat-hint';
+            grid.innerHTML = '选择课程后将显示该教室的座位图';
+            podium.textContent = '— 请先选择课程 —';
+            reset();
+            return;
+        }
+        grid.className = 'seat-hint';
+        grid.innerHTML = '正在加载座位图...';
+        fetch('/seat/layout/' + courseId).then(r => r.json()).then(resp => {
+            if (!resp || resp.code !== 200 || !resp.data) {
+                grid.innerHTML = '加载失败：' + (resp && resp.msg ? resp.msg : '未知错误');
+                return;
+            }
+            renderGrid(resp.data);
+        }).catch(err => {
+            grid.innerHTML = '请求失败：' + err;
+        });
+    }
+
+    function renderGrid(data) {
+        const rows = data.rows, cols = data.cols;
+        const excluded = new Set((data.excluded || []).map(p => p[0] + ',' + p[1]));
+        const occupied = new Set((data.occupied || []).map(p => p[0] + ',' + p[1]));
+
+        podium.textContent = '【' + data.classroomName + '】 讲 台';
+
+        grid.className = 'seat-grid';
+        grid.style.gridTemplateColumns = 'auto repeat(' + cols + ', 36px)';
+        grid.innerHTML = '';
+
+        for (let r = 1; r <= rows; r++) {
+            const label = document.createElement('div');
+            label.className = 'seat-row-label';
+            label.textContent = r + '排';
+            label.style.display = 'flex';
+            label.style.alignItems = 'center';
+            grid.appendChild(label);
+
+            for (let c = 1; c <= cols; c++) {
+                const key = r + ',' + c;
+                const cell = document.createElement('div');
+                cell.className = 'seat';
+                cell.textContent = c;
+                cell.dataset.row = r;
+                cell.dataset.col = c;
+                cell.title = r + '排' + c + '列';
+                if (excluded.has(key)) {
+                    cell.classList.add('seat-disabled');
+                    cell.title += '（不可用）';
+                } else if (occupied.has(key)) {
+                    cell.classList.add('seat-occupied');
+                    cell.title += '（已被占用）';
+                } else {
+                    cell.addEventListener('click', onPick);
+                }
+                grid.appendChild(cell);
+            }
+        }
+        reset();
+    }
+
+    function onPick(e) {
+        document.querySelectorAll('.seat.seat-selected').forEach(el => el.classList.remove('seat-selected'));
+        const cell = e.currentTarget;
+        cell.classList.add('seat-selected');
+        rowInput.value = cell.dataset.row;
+        colInput.value = cell.dataset.col;
+        summary.innerHTML = '已选择座位：<strong style="color:#16a34a;">' + cell.dataset.row + '排 ' + cell.dataset.col + '列</strong>';
+        submitBtn.disabled = false;
+    }
+
+    courseSelect.addEventListener('change', e => loadLayout(e.target.value));
+    if (courseSelect.value) {
+        loadLayout(courseSelect.value);
+    }
+})();
+</script>
 </body>
 </html>

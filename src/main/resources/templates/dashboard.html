@@ -5,8 +5,14 @@
 <section class="panel"><p th:if="${errorMsg}" class="error" th:text="${errorMsg}"></p><div class="menu-grid">
 <a th:if="${isManager}" class="menu-card" href="/student/page/list"><span class="menu-icon">🎓</span><span class="menu-title">学生管理</span><span class="menu-desc">维护学生信息，支持新增、编辑、搜索与删除。</span></a>
 <a th:if="${isManager}" class="menu-card" href="/course/page/list"><span class="menu-icon">📚</span><span class="menu-title">课程管理</span><span class="menu-desc">维护课程信息、授课安排与教室座位布局。</span></a>
+<a th:if="${isManager}" class="menu-card" href="/selection/page/list"><span class="menu-icon">🎯</span><span class="menu-title">选课管理</span><span class="menu-desc">为学生分配课程，管理课程名单。</span></a>
+<a th:unless="${isManager}" class="menu-card" href="/selection/page/my"><span class="menu-icon">📖</span><span class="menu-title">我的课程</span><span class="menu-desc">查看自己已选课程，并跳转至打卡或请假。</span></a>
 <a class="menu-card" href="/attendance/page/checkin"><span class="menu-icon">✅</span><span class="menu-title">考勤打卡</span><span class="menu-desc">从课程下拉框选择课程并提交座位打卡。</span></a>
 <a th:if="${isManager}" class="menu-card" href="/attendance/page/list"><span class="menu-icon">📊</span><span class="menu-title">考勤记录</span><span class="menu-desc">按课程、状态和日期筛选考勤记录。</span></a>
-<a th:if="${isManager}" class="menu-card" href="/leave/page/apply"><span class="menu-icon">📝</span><span class="menu-title">提交请假</span><span class="menu-desc">选择课程，提交未来时间段的请假申请。</span></a>
-<a th:if="${isManager}" class="menu-card" href="/leave/page/list"><span class="menu-icon">🗓️</span><span class="menu-title">请假管理</span><span class="menu-desc">查询请假记录并完成通过或驳回审批。</span></a>
+<a th:unless="${isManager}" class="menu-card" href="/leave/page/apply"><span class="menu-icon">📝</span><span class="menu-title">提交请假</span><span class="menu-desc">选择课程，提交未来时间段的请假申请。</span></a>
+<a th:unless="${isManager}" class="menu-card" href="/leave/page/my"><span class="menu-icon">📒</span><span class="menu-title">我的请假</span><span class="menu-desc">查看个人请假申请的审批状态。</span></a>
+<a th:if="${isManager}" class="menu-card" href="/leave/page/list"><span class="menu-icon">🗓️</span><span class="menu-title">请假审批</span><span class="menu-desc">查询请假记录并完成通过或驳回审批。</span></a>
+<a th:if="${isManager}" class="menu-card" href="/student/page/import"><span class="menu-icon">📥</span><span class="menu-title">学生导入</span><span class="menu-desc">通过 Excel 批量导入学生信息。</span></a>
+<a th:if="${isManager}" class="menu-card" href="/attendance/page/import"><span class="menu-icon">📤</span><span class="menu-title">考勤导入</span><span class="menu-desc">通过 Excel 批量导入考勤记录。</span></a>
+<a class="menu-card" href="/page/password"><span class="menu-icon">🔐</span><span class="menu-title">修改密码</span><span class="menu-desc">修改当前账号的登录密码。</span></a>
 </div><div class="btn-row"><a class="btn btn-secondary" href="/page/logout">退出登录</a></div></section></div></body></html>

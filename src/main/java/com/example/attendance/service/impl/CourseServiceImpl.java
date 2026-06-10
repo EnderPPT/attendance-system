@@ -1,6 +1,8 @@
 package com.example.attendance.service.impl;
 
+import com.example.attendance.dao.UserDao;
 import com.example.attendance.entity.Course;
+import com.example.attendance.entity.User;
 import com.example.attendance.exception.BusinessException;
 import com.example.attendance.repository.CourseRepository;
 import com.example.attendance.service.CourseService;
@@ -12,9 +14,11 @@ import java.util.List;
 @Service
 public class CourseServiceImpl implements CourseService {
     private final CourseRepository courseRepository;
+    private final UserDao userDao;
 
-    public CourseServiceImpl(CourseRepository courseRepository) {
+    public CourseServiceImpl(CourseRepository courseRepository, UserDao userDao) {
         this.courseRepository = courseRepository;
+        this.userDao = userDao;
     }
 
     @Override
@@ -80,9 +84,44 @@ public class CourseServiceImpl implements CourseService {
         if (course.getTeacherId() == null) {
             throw new BusinessException("授课教师不能为空");
         }
+        User teacher = null;
+        try {
+            teacher = userDao.findById(course.getTeacherId());
+        } catch (Exception ignored) {
+        }
+        if (teacher == null) {
+            throw new BusinessException("教师不存在");
+        }
+        if (!"TEACHER".equalsIgnoreCase(teacher.getRole()) && !"ADMIN".equalsIgnoreCase(teacher.getRole())) {
+            throw new BusinessException("仅 TEACHER 或 ADMIN 角色可作为授课教师");
+        }
+        if (course.getExcludeSeats() != null && !course.getExcludeSeats().trim().isEmpty()) {
+            for (String token : course.getExcludeSeats().split(";")) {
+                String trimmed = token.trim();
+                if (trimmed.isEmpty()) continue;
+                String[] rc = trimmed.split(",");
+                if (rc.length != 2) {
+                    throw new BusinessException("排除座位格式应为 行,列;行,列，例如 1,1;1,2");
+                }
+                try {
+                    Integer.parseInt(rc[0].trim());
+                    Integer.parseInt(rc[1].trim());
+                } catch (NumberFormatException e) {
+                    throw new BusinessException("排除座位行列必须是数字");
+                }
+            }
+        }
         if (course.getLayoutRows() == null || course.getLayoutRows() < 1
                 || course.getLayoutCols() == null || course.getLayoutCols() < 1) {
             throw new BusinessException("教室座位行列数必须大于 0");
+        }
+        if (course.getStartTime() != null && course.getEndTime() != null
+                && !course.getEndTime().isAfter(course.getStartTime())) {
+            throw new BusinessException("上课结束时间必须晚于开始时间");
+        }
+        if (course.getLateThresholdMinutes() != null
+                && (course.getLateThresholdMinutes() < 0 || course.getLateThresholdMinutes() > 180)) {
+            throw new BusinessException("迟到阈值必须在 0-180 分钟之间");
         }
         if (course.getWeekday() != null && (course.getWeekday() < 1 || course.getWeekday() > 7)) {
             throw new BusinessException("星期必须在 1 到 7 之间");

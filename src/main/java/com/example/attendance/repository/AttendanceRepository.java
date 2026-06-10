@@ -21,13 +21,16 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long>, J
     boolean existsByCourseIdAndSeatRowAndSeatColAndCheckInTimeGreaterThanEqualAndCheckInTimeLessThan(
             Long courseId, Integer seatRow, Integer seatCol, java.sql.Timestamp start, java.sql.Timestamp end);
 
+    List<Attendance> findByCourseIdAndCheckInTimeGreaterThanEqualAndCheckInTimeLessThan(
+            Long courseId, java.sql.Timestamp start, java.sql.Timestamp end);
+
     // 统计指定学生的总打卡数
     long countByStudentId(Long studentId);
 
-    // 统计指定学生某状态的打卡数（NORMAL/LATE/ABSENT）
+    // 统计指定学生某状态的打卡数
     long countByStudentIdAndStatus(Long studentId, String status);
 
-    // 统计某课程当天的特定状态数（用于班级总体出勤）
+    // 统计某课程当天的特定状态数
     @Query("SELECT COUNT(a) FROM Attendance a WHERE a.courseId = :courseId AND a.status = :status AND a.checkInTime >= :start AND a.checkInTime <= :end")
     long countByCourseStatusAndDateRange(@org.springframework.data.repository.query.Param("courseId") Long courseId,
                                          @org.springframework.data.repository.query.Param("status") String status,

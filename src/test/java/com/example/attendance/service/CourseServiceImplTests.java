@@ -1,6 +1,8 @@
 package com.example.attendance.service;
 
+import com.example.attendance.dao.UserDao;
 import com.example.attendance.entity.Course;
+import com.example.attendance.entity.User;
 import com.example.attendance.exception.BusinessException;
 import com.example.attendance.repository.CourseRepository;
 import com.example.attendance.service.impl.CourseServiceImpl;
@@ -17,12 +19,18 @@ import static org.mockito.Mockito.*;
 class CourseServiceImplTests {
     @Mock
     private CourseRepository courseRepository;
+    @Mock
+    private UserDao userDao;
 
     private CourseServiceImpl courseService;
 
     @BeforeEach
     void setUp() {
-        courseService = new CourseServiceImpl(courseRepository);
+        courseService = new CourseServiceImpl(courseRepository, userDao);
+        User teacher = new User();
+        teacher.setId(2L);
+        teacher.setRole("TEACHER");
+        lenient().when(userDao.findById(2L)).thenReturn(teacher);
     }
 
     @Test

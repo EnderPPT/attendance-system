@@ -72,6 +72,6 @@ public class AuthController {
     }
 
     private User sessionUser(User user) {
-        return new User(user.getId(), user.getUsername(), null, user.getRealName(), user.getRole(), user.getCreateTime());
+        return new User(user.getId(), user.getUsername(), null, user.getRealName(), user.getRole(), user.getMustChangePassword(), user.getCreateTime());
     }
 }
