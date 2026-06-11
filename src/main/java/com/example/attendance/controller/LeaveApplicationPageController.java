@@ -1,6 +1,7 @@
 package com.example.attendance.controller;
 
 import com.example.attendance.config.AuthorizationInterceptor;
+import com.example.attendance.dao.UserDao;
 import com.example.attendance.dto.LeaveApplicationRequest;
 import com.example.attendance.entity.Course;
 import com.example.attendance.entity.LeaveApplication;
@@ -29,13 +30,16 @@ public class LeaveApplicationPageController {
     private final LeaveApplicationService leaveApplicationService;
     private final CourseService courseService;
     private final CourseSelectionService courseSelectionService;
+    private final UserDao userDao;
 
     public LeaveApplicationPageController(LeaveApplicationService leaveApplicationService,
                                           CourseService courseService,
-                                          CourseSelectionService courseSelectionService) {
+                                          CourseSelectionService courseSelectionService,
+                                          UserDao userDao) {
         this.leaveApplicationService = leaveApplicationService;
         this.courseService = courseService;
         this.courseSelectionService = courseSelectionService;
+        this.userDao = userDao;
     }
 
     @GetMapping("/list")
@@ -56,13 +60,29 @@ public class LeaveApplicationPageController {
         List<Course> courses = courseService.getAll();
         Map<Long, Course> courseMap = courses.stream()
                 .collect(Collectors.toMap(Course::getCourseId, Function.identity()));
+        Map<Long, User> userMap = buildUserMap(applications);
         model.addAttribute("applications", applications);
         model.addAttribute("courses", courses);
         model.addAttribute("courseMap", courseMap);
+        model.addAttribute("userMap", userMap);
         model.addAttribute("studentId", studentId);
         model.addAttribute("courseId", courseId);
         model.addAttribute("status", status);
         return "leave-list";
+    }
+
+    private Map<Long, User> buildUserMap(List<LeaveApplication> applications) {
+        java.util.Set<Long> ids = new java.util.LinkedHashSet<>();
+        for (LeaveApplication a : applications) {
+            if (a.getStudentId() != null) ids.add(a.getStudentId());
+        }
+        Map<Long, User> map = new java.util.HashMap<>();
+        if (!ids.isEmpty()) {
+            for (User u : userDao.findStudentsByIds(new java.util.ArrayList<>(ids))) {
+                map.put(u.getId(), u);
+            }
+        }
+        return map;
     }
 
     @GetMapping("/my")

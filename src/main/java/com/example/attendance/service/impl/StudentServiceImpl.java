@@ -64,22 +64,39 @@ public class StudentServiceImpl implements StudentService {
         if (sortBy == null || sortBy.trim().isEmpty()) {
             sortBy = "studentId";
         }
-
         if (!"studentId".equals(sortBy) && !"name".equals(sortBy)) {
             sortBy = "studentId";
         }
 
-        Sort sort = "desc".equalsIgnoreCase(direction) ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
-
+        List<Student> list;
         if (keyword == null || keyword.trim().isEmpty()) {
-            return studentRepository.findAll(sort);
+            list = studentRepository.findAll();
+        } else {
+            list = studentRepository.findByStudentIdContainingOrNameContainingOrClassNameContaining(
+                    keyword.trim(),
+                    keyword.trim(),
+                    keyword.trim(),
+                    org.springframework.data.domain.Sort.unsorted());
         }
 
-        return studentRepository.findByStudentIdContainingOrNameContainingOrClassNameContaining(
-                keyword.trim(),
-                keyword.trim(),
-                keyword.trim(),
-                sort);
+        java.text.Collator collator = java.text.Collator.getInstance(java.util.Locale.CHINA);
+        collator.setStrength(java.text.Collator.PRIMARY);
+        java.util.Comparator<Student> cmp;
+        if ("name".equals(sortBy)) {
+            cmp = (a, b) -> collator.compare(safe(a.getName()), safe(b.getName()));
+        } else {
+            cmp = (a, b) -> safe(a.getStudentId()).compareTo(safe(b.getStudentId()));
+        }
+        if ("desc".equalsIgnoreCase(direction)) {
+            cmp = cmp.reversed();
+        }
+        list = new java.util.ArrayList<>(list);
+        list.sort(cmp);
+        return list;
+    }
+
+    private static String safe(String s) {
+        return s == null ? "" : s;
     }
 
     @Override

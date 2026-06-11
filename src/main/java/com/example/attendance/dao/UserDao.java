@@ -74,4 +74,22 @@ public class UserDao {
         Integer count = jdbcTemplate.queryForObject(sql, Integer.class, username);
         return count != null && count > 0;
     }
+
+    public List<User> findStudentsByUsernames(List<String> usernames) {
+        if (usernames == null || usernames.isEmpty()) {
+            return java.util.Collections.emptyList();
+        }
+        String inClause = String.join(",", java.util.Collections.nCopies(usernames.size(), "?"));
+        String sql = "SELECT " + SELECT_COLUMNS + " FROM sys_user WHERE role = 'STUDENT' AND username IN (" + inClause + ")";
+        return jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(User.class), usernames.toArray());
+    }
+
+    public List<User> findStudentsByIds(List<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return java.util.Collections.emptyList();
+        }
+        String inClause = String.join(",", java.util.Collections.nCopies(ids.size(), "?"));
+        String sql = "SELECT " + SELECT_COLUMNS + " FROM sys_user WHERE id IN (" + inClause + ")";
+        return jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(User.class), ids.toArray());
+    }
 }

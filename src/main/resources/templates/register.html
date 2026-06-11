@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>用户注册</title>
+    <title>注册 · 班级考勤公报</title>
     <link rel="stylesheet" href="/css/style.css" th:href="@{/css/style.css}">
 </head>
 <body>
 <div class="auth-page">
     <section class="hero-card">
         <div class="hero-content">
-            <div class="eyebrow">✨ CREATE ACCOUNT</div>
-            <h1 class="hero-title">创建账号</h1>
-            <p class="hero-desc">填写基础信息，注册后将以学生身份使用考勤打卡功能。</p>
+            <div class="eyebrow">№ 002 · Register</div>
+            <h1 class="hero-title">注册账号</h1>
+            <p class="hero-desc">填写下列信息以创建学生账号。</p>
         </div>
     </section>
 
@@ -23,32 +23,29 @@
             <div class="form-grid">
                 <div class="form-group full">
                     <label>用户名</label>
-                    <input type="text" name="username" placeholder="请输入用户名" required>
+                    <input type="text" name="username" placeholder="用作登录名" required>
                 </div>
-
                 <div class="form-group full">
                     <label>真实姓名</label>
-                    <input type="text" name="realName" placeholder="请输入真实姓名" required>
+                    <input type="text" name="realName" placeholder="必填" required>
                 </div>
-
                 <div class="form-group full">
                     <label>密码</label>
-                    <input type="password" name="password" placeholder="请输入密码" required>
+                    <input type="password" name="password" placeholder="不少于 6 位" required>
                 </div>
-
                 <div class="form-group full">
                     <label>确认密码</label>
-                    <input type="password" name="confirmPassword" placeholder="请再次输入密码" required>
+                    <input type="password" name="confirmPassword" placeholder="再次输入" required>
                 </div>
             </div>
 
             <div class="btn-row">
-                <button type="submit" class="btn btn-primary btn-block">注册</button>
+                <button type="submit" class="btn btn-primary btn-block">提交注册</button>
             </div>
         </form>
 
         <div class="link">
-            已有账号？<a href="/login">去登录</a>
+            已有账号？<a href="/login">返回登录</a>
         </div>
     </section>
 </div>

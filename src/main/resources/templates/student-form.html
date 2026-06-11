@@ -3,18 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>学生表单</title>
+    <title>学生信息</title>
     <link rel="stylesheet" href="/css/style.css" th:href="@{/css/style.css}">
 </head>
 <body>
-<div class="app-page">
-  <nav class="page-nav"><a class="active" href="/dashboard">首页</a></nav>
+<div class="app-page form-page">
+    <nav class="page-nav">
+        <a href="/dashboard">首页</a>
+        <a href="/student/page/list">学生档案</a>
+        <a class="active" href="#">表单</a>
+    </nav>
+
     <section class="hero-card">
         <div class="hero-content">
             <div>
-                <div class="eyebrow">✨ STUDENT FORM</div>
-                <h1 class="hero-title">学生信息表单</h1>
-                <p class="hero-desc">维护学生基础资料，包含学号、姓名、班级、年龄、性别、出生日期和联系方式。</p>
+                <div class="eyebrow">№ 101 · Student Form</div>
+                <h1 class="hero-title">学生信息</h1>
+                <p class="hero-desc">填写或修改学生档案。</p>
             </div>
             <a class="btn btn-secondary" th:href="@{/student/page/list}">返回列表</a>
         </div>
@@ -27,46 +32,40 @@
             <div class="form-grid">
                 <div class="form-group">
                     <label>学号</label>
-                    <input type="text" th:field="*{studentId}" placeholder="请输入学号">
+                    <input type="text" th:field="*{studentId}" placeholder="必填">
                 </div>
-
                 <div class="form-group">
                     <label>姓名</label>
-                    <input type="text" th:field="*{name}" placeholder="请输入姓名">
+                    <input type="text" th:field="*{name}" placeholder="必填">
                 </div>
-
                 <div class="form-group">
                     <label>班级</label>
-                    <input type="text" th:field="*{className}" placeholder="请输入班级">
+                    <input type="text" th:field="*{className}" placeholder="例如 计科 1 班">
                 </div>
-
                 <div class="form-group">
                     <label>年龄</label>
-                    <input type="number" th:field="*{age}" placeholder="请输入年龄">
+                    <input type="number" th:field="*{age}">
                 </div>
-
                 <div class="form-group">
                     <label>性别</label>
                     <select th:field="*{gender}">
-                        <option value="">请选择性别</option>
+                        <option value="">未选择</option>
                         <option value="男">男</option>
                         <option value="女">女</option>
                     </select>
                 </div>
-
                 <div class="form-group">
                     <label>出生日期</label>
                     <input type="date" th:field="*{birthDate}">
                 </div>
-
                 <div class="form-group full">
                     <label>联系方式</label>
-                    <input type="text" th:field="*{phone}" placeholder="请输入11位手机号">
+                    <input type="text" th:field="*{phone}" placeholder="11 位手机号">
                 </div>
             </div>
 
             <div class="btn-row">
-                <button type="submit" class="btn btn-primary">保存学生</button>
+                <button type="submit" class="btn btn-primary">保 存</button>
                 <a class="btn btn-secondary" th:href="@{/student/page/list}">取消</a>
             </div>
         </form>

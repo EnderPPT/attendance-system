@@ -1,6 +1,7 @@
 package com.example.attendance.service.impl;
 
 import com.example.attendance.dao.UserDao;
+import com.example.attendance.dto.ImportResult;
 import com.example.attendance.entity.Course;
 import com.example.attendance.entity.CourseSelection;
 import com.example.attendance.entity.User;
@@ -13,7 +14,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class CourseSelectionServiceImpl implements CourseSelectionService {
@@ -49,6 +52,51 @@ public class CourseSelectionServiceImpl implements CourseSelectionService {
         selection.setStudentId(studentId);
         selection.setSelectTime(new Timestamp(System.currentTimeMillis()));
         return courseSelectionRepository.save(selection);
+    }
+
+    @Override
+    public CourseSelection selectByUsername(Long courseId, String studentNumber) {
+        if (studentNumber == null || studentNumber.trim().isEmpty()) {
+            throw new BusinessException("学号不能为空");
+        }
+        User user = userDao.findByUsernameOrNull(studentNumber.trim());
+        if (user == null) {
+            throw new BusinessException("学号 " + studentNumber.trim() + " 对应的账号不存在");
+        }
+        return select(courseId, user.getId());
+    }
+
+    @Override
+    public ImportResult batchSelectByUsernames(Long courseId, List<String> studentNumbers) {
+        ImportResult result = new ImportResult();
+        if (courseId == null) {
+            throw new BusinessException("课程 ID 不能为空");
+        }
+        if (!courseRepository.existsById(courseId)) {
+            throw new BusinessException("课程不存在");
+        }
+        if (studentNumbers == null || studentNumbers.isEmpty()) {
+            return result;
+        }
+
+        Set<String> distinct = new LinkedHashSet<>();
+        for (String raw : studentNumbers) {
+            if (raw == null) continue;
+            String trimmed = raw.trim();
+            if (!trimmed.isEmpty()) {
+                distinct.add(trimmed);
+            }
+        }
+
+        for (String studentNumber : distinct) {
+            try {
+                selectByUsername(courseId, studentNumber);
+                result.incrementSuccess();
+            } catch (Exception e) {
+                result.incrementFail(studentNumber + "：" + e.getMessage());
+            }
+        }
+        return result;
     }
 
     @Override

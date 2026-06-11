@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>用户登录</title>
+    <title>登录 · 班级考勤公报</title>
     <link rel="stylesheet" href="/css/style.css" th:href="@{/css/style.css}">
 </head>
 <body>
 <div class="auth-page">
     <section class="hero-card">
         <div class="hero-content">
-            <div class="eyebrow">✨ ATTENDANCE SYSTEM</div>
-            <h1 class="hero-title">欢迎回来</h1>
-            <p class="hero-desc">登录班级考勤管理系统，继续管理学生与考勤数据。</p>
+            <div class="eyebrow">№ 001 · Sign In</div>
+            <h1 class="hero-title">进入系统</h1>
+            <p class="hero-desc">使用学号或工号登录。新建账号的默认密码为 123456。</p>
         </div>
     </section>
 
@@ -23,23 +23,22 @@
         <form action="/page/login" method="post">
             <div class="form-grid">
                 <div class="form-group full">
-                    <label>用户名</label>
-                    <input type="text" name="username" placeholder="请输入用户名" required>
+                    <label>账号</label>
+                    <input type="text" name="username" placeholder="学号或工号" required>
                 </div>
-
                 <div class="form-group full">
                     <label>密码</label>
-                    <input type="password" name="password" placeholder="请输入密码" required>
+                    <input type="password" name="password" placeholder="登录密码" required>
                 </div>
             </div>
 
             <div class="btn-row">
-                <button type="submit" class="btn btn-primary btn-block">登录</button>
+                <button type="submit" class="btn btn-primary btn-block">登 录</button>
             </div>
         </form>
 
         <div class="link">
-            没有账号？<a href="/register">去注册</a>
+            尚未注册？<a href="/register">前往注册</a>
         </div>
     </section>
 </div>

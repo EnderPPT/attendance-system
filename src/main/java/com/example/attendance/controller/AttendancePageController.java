@@ -1,5 +1,6 @@
 package com.example.attendance.controller;
 
+import com.example.attendance.dao.UserDao;
 import com.example.attendance.dto.AttendanceQueryDTO;
 import com.example.attendance.dto.ImportResult;
 import com.example.attendance.entity.Attendance;
@@ -31,6 +32,9 @@ public class AttendancePageController {
 
     @Autowired
     private CourseSelectionService courseSelectionService;
+
+    @Autowired
+    private UserDao userDao;
 
     @GetMapping("/checkin")
     public String checkinPage(@RequestParam(required = false) Long courseId, Model model, HttpSession session) {
@@ -116,7 +120,19 @@ public class AttendancePageController {
 
         Page<Attendance> pageData = attendanceService.queryByCondition(query);
 
+        java.util.Set<Long> ids = new java.util.LinkedHashSet<>();
+        for (Attendance a : pageData.getContent()) {
+            if (a.getStudentId() != null) ids.add(a.getStudentId());
+        }
+        java.util.Map<Long, com.example.attendance.entity.User> userMap = new java.util.HashMap<>();
+        if (!ids.isEmpty()) {
+            for (com.example.attendance.entity.User u : userDao.findStudentsByIds(new java.util.ArrayList<>(ids))) {
+                userMap.put(u.getId(), u);
+            }
+        }
+
         model.addAttribute("pageData", pageData);
+        model.addAttribute("userMap", userMap);
         model.addAttribute("courseId", courseId);
         model.addAttribute("status", status);
         model.addAttribute("startTime", startTime);
