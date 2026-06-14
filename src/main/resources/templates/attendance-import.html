@@ -6,42 +6,39 @@
     <link rel="stylesheet" href="/css/style.css" th:href="@{/css/style.css}">
 </head>
 <body>
-<div class="app-page form-page">
-    <nav class="page-nav">
-        <a href="/dashboard">首页</a>
-        <a href="/attendance/page/list">考勤记录</a>
-        <a class="active" href="#">导入</a>
-    </nav>
+<div class="app-shell">
+    <th:block th:replace="~{fragments/sidebar :: sidebar('attendance-import')}"></th:block>
 
-    <section class="hero-card">
-        <div class="hero-content">
+    <main class="main">
+        <div class="page-head">
             <div>
-                <div class="eyebrow">№ 402 · Bulk Import</div>
-                <h1 class="hero-title">从 Excel 批量导入考勤</h1>
-                <p class="hero-desc">表头格式：学号、课程号、打卡时间、状态、座位排数、座位列数。</p>
+                <h1 class="page-title">考勤导入</h1>
+                <p class="page-subtitle">表头格式：学号、课程号、打卡时间、状态、座位排数、座位列数。</p>
             </div>
-            <a class="btn btn-secondary" href="/attendance/page/list">返回列表</a>
+            <div class="actions">
+                <a class="btn btn-secondary" href="/attendance/page/list">返回列表</a>
+            </div>
         </div>
-    </section>
 
-    <section class="panel">
-        <p th:if="${error}" class="error" th:text="${error}"></p>
-        <p th:if="${success}" class="success" th:text="${success}"></p>
+        <div class="panel">
+            <p th:if="${error}" class="error" th:text="${error}"></p>
+            <p th:if="${success}" class="success" th:text="${success}"></p>
 
-        <form th:action="@{/attendance/page/import}" method="post" enctype="multipart/form-data">
-            <div class="form-grid">
-                <div class="form-group full">
-                    <label>选择文件</label>
-                    <input type="file" name="file" accept=".xlsx,.xls" required onchange="checkFileSize(this)">
-                    <small style="color:var(--muted); font-size:12px; margin-top:6px;">支持 xlsx / xls，单文件不超过 10MB。</small>
+            <form th:action="@{/attendance/page/import}" method="post" enctype="multipart/form-data">
+                <div class="form-grid">
+                    <div class="form-group full">
+                        <label>选择文件</label>
+                        <input type="file" name="file" accept=".xlsx,.xls" required onchange="checkFileSize(this)">
+                        <small style="color:var(--muted); font-size:12px; margin-top:6px; display:block;">支持 xlsx / xls，单文件不超过 10MB。</small>
+                    </div>
                 </div>
-            </div>
-            <div class="btn-row" style="align-items:center;">
-                <button type="submit" class="btn btn-primary" onclick="showLoading()">上传并解析</button>
-                <span id="loadingText" style="display:none; color:var(--muted); font-style:italic;">正在解析，请稍候…</span>
-            </div>
-        </form>
-    </section>
+                <div class="btn-row" style="align-items:center;">
+                    <button type="submit" class="btn btn-primary" onclick="showLoading()">上传并解析</button>
+                    <span id="loadingText" style="display:none; color:var(--muted);">正在解析，请稍候…</span>
+                </div>
+            </form>
+        </div>
+    </main>
 </div>
 
 <script>

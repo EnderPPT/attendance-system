@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<aside class="sidebar" th:fragment="sidebar(active)">
+    <div class="brand">
+        <h1 class="brand-name">考勤管理系统</h1>
+        <p class="brand-sub">Attendance · v1.0</p>
+    </div>
+
+    <nav>
+        <div class="nav-section">总览</div>
+        <a class="nav-link" th:classappend="${active == 'dashboard'} ? ' active'" href="/dashboard">
+            <span class="nav-dot"></span>首页
+        </a>
+
+        <div class="nav-section" th:if="${loginUser != null and (loginUser.role == 'ADMIN' or loginUser.role == 'TEACHER')}">教学管理</div>
+        <a th:if="${loginUser != null and (loginUser.role == 'ADMIN' or loginUser.role == 'TEACHER')}"
+           class="nav-link" th:classappend="${active == 'students'} ? ' active'" href="/student/page/list">
+            <span class="nav-dot"></span>学生档案
+        </a>
+        <a th:if="${loginUser != null and (loginUser.role == 'ADMIN' or loginUser.role == 'TEACHER')}"
+           class="nav-link" th:classappend="${active == 'courses'} ? ' active'" href="/course/page/list">
+            <span class="nav-dot"></span>课程目录
+        </a>
+        <a th:if="${loginUser != null and (loginUser.role == 'ADMIN' or loginUser.role == 'TEACHER')}"
+           class="nav-link" th:classappend="${active == 'selection'} ? ' active'" href="/selection/page/list">
+            <span class="nav-dot"></span>选课管理
+        </a>
+
+        <div class="nav-section">考勤与请假</div>
+        <a th:if="${loginUser != null and loginUser.role == 'STUDENT'}"
+           class="nav-link" th:classappend="${active == 'mycourse'} ? ' active'" href="/selection/page/my">
+            <span class="nav-dot"></span>我的课程
+        </a>
+        <a class="nav-link" th:classappend="${active == 'checkin'} ? ' active'" href="/attendance/page/checkin">
+            <span class="nav-dot"></span>考勤打卡
+        </a>
+        <a th:if="${loginUser != null and (loginUser.role == 'ADMIN' or loginUser.role == 'TEACHER')}"
+           class="nav-link" th:classappend="${active == 'attendance'} ? ' active'" href="/attendance/page/list">
+            <span class="nav-dot"></span>考勤记录
+        </a>
+        <a th:if="${loginUser != null and loginUser.role == 'STUDENT'}"
+           class="nav-link" th:classappend="${active == 'leave-apply'} ? ' active'" href="/leave/page/apply">
+            <span class="nav-dot"></span>提交请假
+        </a>
+        <a th:if="${loginUser != null and loginUser.role == 'STUDENT'}"
+           class="nav-link" th:classappend="${active == 'leave-my'} ? ' active'" href="/leave/page/my">
+            <span class="nav-dot"></span>我的请假
+        </a>
+        <a th:if="${loginUser != null and (loginUser.role == 'ADMIN' or loginUser.role == 'TEACHER')}"
+           class="nav-link" th:classappend="${active == 'leave'} ? ' active'" href="/leave/page/list">
+            <span class="nav-dot"></span>请假审批
+        </a>
+
+        <div class="nav-section" th:if="${loginUser != null and (loginUser.role == 'ADMIN' or loginUser.role == 'TEACHER')}">数据导入</div>
+        <a th:if="${loginUser != null and (loginUser.role == 'ADMIN' or loginUser.role == 'TEACHER')}"
+           class="nav-link" th:classappend="${active == 'student-import'} ? ' active'" href="/student/page/import">
+            <span class="nav-dot"></span>学生导入
+        </a>
+        <a th:if="${loginUser != null and (loginUser.role == 'ADMIN' or loginUser.role == 'TEACHER')}"
+           class="nav-link" th:classappend="${active == 'attendance-import'} ? ' active'" href="/attendance/page/import">
+            <span class="nav-dot"></span>考勤导入
+        </a>
+
+        <div class="nav-section">账号</div>
+        <a class="nav-link" th:classappend="${active == 'password'} ? ' active'" href="/page/password">
+            <span class="nav-dot"></span>修改密码
+        </a>
+    </nav>
+
+    <div class="sidebar-footer" th:if="${loginUser != null}">
+        <div class="sidebar-user">
+            <span class="sidebar-avatar" th:text="${#strings.substring(loginUser.realName, 0, 1)}">U</span>
+            <span class="sidebar-user-info">
+                <strong th:text="${loginUser.realName}">用户</strong>
+                <span th:text="${loginUser.role}">ROLE</span>
+            </span>
+        </div>
+        <a href="/page/logout">退出登录</a>
+    </div>
+</aside>
+
+</body>
+</html>

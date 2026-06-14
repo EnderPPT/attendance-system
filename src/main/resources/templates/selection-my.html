@@ -7,53 +7,52 @@
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
-<div class="app-page">
-    <nav class="page-nav"><a class="active" href="/dashboard">首页</a></nav>
+<div class="app-shell">
+    <th:block th:replace="~{fragments/sidebar :: sidebar('mycourse')}"></th:block>
 
-    <section class="hero-card">
-        <div class="hero-content">
+    <main class="main">
+        <div class="page-head">
             <div>
-                <div class="eyebrow">№ 301 · My Courses</div>
-                <h1 class="hero-title">我的课程</h1>
-                <p class="hero-desc">已选课程一览，可直接前往打卡或请假。</p>
+                <h1 class="page-title">我的课程</h1>
+                <p class="page-subtitle">已选课程一览，可直接前往打卡或请假。</p>
             </div>
         </div>
-    </section>
 
-    <section class="panel">
-        <div class="table-wrap">
-            <table>
-                <thead>
-                <tr>
-                    <th>课程代码</th>
-                    <th>课程名称</th>
-                    <th>班级</th>
-                    <th>教室</th>
-                    <th>上课时间</th>
-                    <th style="width:180px">操作</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:if="${#lists.isEmpty(courses)}">
-                    <td colspan="6" class="empty">尚未选课，请联系老师或管理员。</td>
-                </tr>
-                <tr th:each="c : ${courses}">
-                    <td class="student-id" th:text="${c.courseCode}"></td>
-                    <td class="name-cell" th:text="${c.courseName}"></td>
-                    <td th:text="${c.className}"></td>
-                    <td th:text="${c.classroomName}"></td>
-                    <td th:text="${c.weekday != null ? '周' + c.weekday : '-'} + ' ' + ${c.startTime != null ? c.startTime + '-' + c.endTime : ''}"></td>
-                    <td>
-                        <div class="actions">
-                            <a class="btn btn-edit" th:href="@{/attendance/page/checkin(courseId=${c.courseId})}">打卡</a>
-                            <a class="btn btn-edit" th:href="@{/leave/page/apply(courseId=${c.courseId})}">请假</a>
-                        </div>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
+        <div class="panel">
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>课程代码</th>
+                        <th>课程名称</th>
+                        <th>班级</th>
+                        <th>教室</th>
+                        <th>上课时间</th>
+                        <th style="width:180px">操作</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${#lists.isEmpty(courses)}">
+                        <td colspan="6" class="empty">尚未选课，请联系老师或管理员。</td>
+                    </tr>
+                    <tr th:each="c : ${courses}">
+                        <td class="student-id" th:text="${c.courseCode}"></td>
+                        <td class="name-cell" th:text="${c.courseName}"></td>
+                        <td th:text="${c.className}"></td>
+                        <td th:text="${c.classroomName}"></td>
+                        <td th:text="${c.weekday != null ? '周' + c.weekday : '-'} + ' ' + ${c.startTime != null ? c.startTime + '-' + c.endTime : ''}"></td>
+                        <td>
+                            <div class="actions">
+                                <a class="btn btn-edit" th:href="@{/attendance/page/checkin(courseId=${c.courseId})}">打卡</a>
+                                <a class="btn btn-edit" th:href="@{/leave/page/apply(courseId=${c.courseId})}">请假</a>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
-    </section>
+    </main>
 </div>
 </body>
 </html>

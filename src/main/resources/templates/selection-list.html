@@ -7,104 +7,103 @@
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
-<div class="app-page">
-    <nav class="page-nav"><a class="active" href="/dashboard">首页</a></nav>
+<div class="app-shell">
+    <th:block th:replace="~{fragments/sidebar :: sidebar('selection')}"></th:block>
 
-    <section class="hero-card">
-        <div class="hero-content">
+    <main class="main">
+        <div class="page-head">
             <div>
-                <div class="eyebrow">№ 300 · Enrollment</div>
-                <h1 class="hero-title">选课管理</h1>
-                <p class="hero-desc">选定课程后查看名单，可按学号单独添加或粘贴批量添加。</p>
+                <h1 class="page-title">选课管理</h1>
+                <p class="page-subtitle">选定课程后查看名单，可按学号单独添加或粘贴批量添加。</p>
             </div>
         </div>
-    </section>
 
-    <section class="panel">
-        <p th:if="${success}" class="success" th:text="${success}"></p>
-        <p th:if="${error}" class="error" th:text="${error}"></p>
+        <div class="panel">
+            <p th:if="${success}" class="success" th:text="${success}"></p>
+            <p th:if="${error}" class="error" th:text="${error}"></p>
 
-        <form class="filter-row" action="/selection/page/list" method="get">
-            <div class="field">
-                <span class="search-icon">›</span>
-                <select name="courseId">
-                    <option value="">— 请选择课程 —</option>
-                    <option th:each="course : ${courses}" th:value="${course.courseId}"
-                            th:text="${course.courseCode + '   ' + course.courseName + '   ' + course.className}"
-                            th:selected="${course.courseId == courseId}"></option>
-                </select>
-            </div>
-            <button class="btn btn-primary" type="submit">查询</button>
-            <a class="btn btn-reset" href="/selection/page/list">重置</a>
-        </form>
+            <form class="filter-row" action="/selection/page/list" method="get">
+                <div class="field">
+                    <span class="search-icon">⌕</span>
+                    <select name="courseId">
+                        <option value="">— 请选择课程 —</option>
+                        <option th:each="course : ${courses}" th:value="${course.courseId}"
+                                th:text="${course.courseCode + '   ' + course.courseName + '   ' + course.className}"
+                                th:selected="${course.courseId == courseId}"></option>
+                    </select>
+                </div>
+                <button class="btn btn-primary" type="submit">查询</button>
+                <a class="btn btn-reset" href="/selection/page/list">重置</a>
+            </form>
 
-        <div th:if="${selectedCourse != null}">
-            <h3 style="margin:24px 0 6px; font-size:18px; font-weight:600;"
-                th:text="${selectedCourse.courseName + ' · ' + selectedCourse.className}"></h3>
-            <p style="margin:0 0 14px; color:var(--muted); font-size:13px;"
-               th:text="${selectedCourse.courseCode + ' · ' + selectedCourse.classroomName}"></p>
+            <div th:if="${selectedCourse != null}">
+                <h3 style="margin:18px 0 4px; font-size:16px; font-weight:600; color:var(--text);"
+                    th:text="${selectedCourse.courseName + ' · ' + selectedCourse.className}"></h3>
+                <p style="margin:0 0 14px; color:var(--muted); font-size:13px;"
+                   th:text="${selectedCourse.courseCode + ' · ' + selectedCourse.classroomName}"></p>
 
-            <div class="split">
-                <section>
-                    <h4>单条添加</h4>
-                    <form action="/selection/page/add" method="post">
-                        <input type="hidden" name="courseId" th:value="${selectedCourse.courseId}">
-                        <div class="form-group full" style="margin-bottom:16px;">
-                            <label>学号</label>
-                            <input type="text" name="studentNumber" placeholder="例如 42211127" required>
-                        </div>
-                        <button class="btn btn-primary" type="submit">添 加</button>
-                    </form>
-                </section>
+                <div class="split">
+                    <section>
+                        <h4>单条添加</h4>
+                        <form action="/selection/page/add" method="post">
+                            <input type="hidden" name="courseId" th:value="${selectedCourse.courseId}">
+                            <div class="form-group full" style="margin-bottom:14px;">
+                                <label>学号</label>
+                                <input type="text" name="studentNumber" placeholder="例如 42211127" required>
+                            </div>
+                            <button class="btn btn-primary" type="submit">添 加</button>
+                        </form>
+                    </section>
 
-                <section>
-                    <h4>批量添加</h4>
-                    <form action="/selection/page/batch" method="post">
-                        <input type="hidden" name="courseId" th:value="${selectedCourse.courseId}">
-                        <div class="form-group full" style="margin-bottom:16px;">
-                            <label>学号列表 <small>空格 / 逗号 / 分号 / 换行均可</small></label>
-                            <textarea name="studentNumbers" rows="3" required
-                                      placeholder="42211127, 42211128&#10;42211129"></textarea>
-                        </div>
-                        <button class="btn btn-primary" type="submit">批量添加</button>
-                    </form>
-                </section>
-            </div>
+                    <section>
+                        <h4>批量添加</h4>
+                        <form action="/selection/page/batch" method="post">
+                            <input type="hidden" name="courseId" th:value="${selectedCourse.courseId}">
+                            <div class="form-group full" style="margin-bottom:14px;">
+                                <label>学号列表 <small>空格 / 逗号 / 分号 / 换行</small></label>
+                                <textarea name="studentNumbers" rows="3" required
+                                          placeholder="42211127, 42211128&#10;42211129"></textarea>
+                            </div>
+                            <button class="btn btn-primary" type="submit">批量添加</button>
+                        </form>
+                    </section>
+                </div>
 
-            <div class="table-wrap">
-                <table>
-                    <thead>
-                    <tr>
-                        <th>学号</th>
-                        <th>姓名</th>
-                        <th>用户 ID</th>
-                        <th>角色</th>
-                        <th style="width:90px">操作</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr th:if="${#lists.isEmpty(students)}">
-                        <td colspan="5" class="empty">该课程暂无学生。</td>
-                    </tr>
-                    <tr th:each="s : ${students}">
-                        <td class="student-id" th:text="${s.username}"></td>
-                        <td class="name-cell" th:text="${s.realName}"></td>
-                        <td th:text="${s.id}"></td>
-                        <td th:text="${s.role}"></td>
-                        <td>
-                            <form action="/selection/page/delete" method="post"
-                                  onsubmit="return confirm('确认退选该学生？');" style="display:inline">
-                                <input type="hidden" name="courseId" th:value="${selectedCourse.courseId}">
-                                <input type="hidden" name="studentId" th:value="${s.id}">
-                                <button class="btn btn-delete" type="submit">退选</button>
-                            </form>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>学号</th>
+                            <th>姓名</th>
+                            <th>用户 ID</th>
+                            <th>角色</th>
+                            <th style="width:90px">操作</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:if="${#lists.isEmpty(students)}">
+                            <td colspan="5" class="empty">该课程暂无学生。</td>
+                        </tr>
+                        <tr th:each="s : ${students}">
+                            <td class="student-id" th:text="${s.username}"></td>
+                            <td class="name-cell" th:text="${s.realName}"></td>
+                            <td th:text="${s.id}"></td>
+                            <td th:text="${s.role}"></td>
+                            <td>
+                                <form action="/selection/page/delete" method="post"
+                                      onsubmit="return confirm('确认退选该学生？');" style="display:inline">
+                                    <input type="hidden" name="courseId" th:value="${selectedCourse.courseId}">
+                                    <input type="hidden" name="studentId" th:value="${s.id}">
+                                    <button class="btn btn-delete" type="submit">退选</button>
+                                </form>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
-    </section>
+    </main>
 </div>
 </body>
 </html>

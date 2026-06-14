@@ -3,119 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>首页 · 班级考勤公报</title>
+    <title>首页 · 考勤管理系统</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
-<div class="app-page">
-    <section class="hero-card">
-        <div class="hero-content">
+<div class="app-shell">
+    <th:block th:replace="~{fragments/sidebar :: sidebar('dashboard')}"></th:block>
+
+    <main class="main">
+        <div class="page-head">
             <div>
-                <div class="eyebrow">№ 000 · Index</div>
-                <h1 class="hero-title" th:text="${title}">班级考勤管理</h1>
-                <p class="hero-desc">从下列条目进入对应功能。</p>
+                <h1 class="page-title" th:text="${'你好，' + loginUser.realName}">你好</h1>
+                <p class="page-subtitle">从左侧菜单或下方快捷入口进入功能。</p>
             </div>
-            <div class="hero-stat">
-                <strong th:text="${loginUser.realName}">用户</strong>
-                <span th:text="${loginUser.role}">角色</span>
+            <div class="stat">
+                <strong th:text="${loginUser.role}">ROLE</strong>
+                <span>当前角色</span>
             </div>
         </div>
-    </section>
 
-    <section class="panel">
-        <p th:if="${errorMsg}" class="error" th:text="${errorMsg}"></p>
+        <div th:if="${errorMsg}" class="error" th:text="${errorMsg}"></div>
 
-        <div class="menu-grid">
-            <a th:if="${isManager}" class="menu-card" href="/student/page/list">
-                <span></span>
-                <span>
-                    <span class="menu-title">学生管理</span>
-                    <span class="menu-desc">维护学生档案，支持搜索、排序与批量删除。</span>
-                </span>
-            </a>
-            <a th:if="${isManager}" class="menu-card" href="/course/page/list">
-                <span></span>
-                <span>
-                    <span class="menu-title">课程管理</span>
-                    <span class="menu-desc">课程信息、教室座位布局与上课时间。</span>
-                </span>
-            </a>
-            <a th:if="${isManager}" class="menu-card" href="/selection/page/list">
-                <span></span>
-                <span>
+        <div class="panel">
+            <div class="menu-grid">
+                <a th:if="${isManager}" class="menu-card" href="/student/page/list">
+                    <span class="menu-title">学生档案</span>
+                    <span class="menu-desc">维护学生基础资料。</span>
+                </a>
+                <a th:if="${isManager}" class="menu-card" href="/course/page/list">
+                    <span class="menu-title">课程目录</span>
+                    <span class="menu-desc">维护课程与教室座位布局。</span>
+                </a>
+                <a th:if="${isManager}" class="menu-card" href="/selection/page/list">
                     <span class="menu-title">选课管理</span>
-                    <span class="menu-desc">为学生分配课程，按学号批量选课。</span>
-                </span>
-            </a>
-            <a th:unless="${isManager}" class="menu-card" href="/selection/page/my">
-                <span></span>
-                <span>
+                    <span class="menu-desc">为学生分配课程。</span>
+                </a>
+                <a th:unless="${isManager}" class="menu-card" href="/selection/page/my">
                     <span class="menu-title">我的课程</span>
                     <span class="menu-desc">已选课程一览。</span>
-                </span>
-            </a>
-            <a class="menu-card" href="/attendance/page/checkin">
-                <span></span>
-                <span>
+                </a>
+                <a class="menu-card" href="/attendance/page/checkin">
                     <span class="menu-title">考勤打卡</span>
-                    <span class="menu-desc">选择课程，在座位图上完成打卡。</span>
-                </span>
-            </a>
-            <a th:if="${isManager}" class="menu-card" href="/attendance/page/list">
-                <span></span>
-                <span>
+                    <span class="menu-desc">在座位图上提交打卡。</span>
+                </a>
+                <a th:if="${isManager}" class="menu-card" href="/attendance/page/list">
                     <span class="menu-title">考勤记录</span>
-                    <span class="menu-desc">按课程、状态、日期查询。</span>
-                </span>
-            </a>
-            <a th:unless="${isManager}" class="menu-card" href="/leave/page/apply">
-                <span></span>
-                <span>
+                    <span class="menu-desc">按课程、状态、日期检索。</span>
+                </a>
+                <a th:unless="${isManager}" class="menu-card" href="/leave/page/apply">
                     <span class="menu-title">提交请假</span>
                     <span class="menu-desc">三天内的请假申请。</span>
-                </span>
-            </a>
-            <a th:unless="${isManager}" class="menu-card" href="/leave/page/my">
-                <span></span>
-                <span>
+                </a>
+                <a th:unless="${isManager}" class="menu-card" href="/leave/page/my">
                     <span class="menu-title">我的请假</span>
                     <span class="menu-desc">查看审批状态。</span>
-                </span>
-            </a>
-            <a th:if="${isManager}" class="menu-card" href="/leave/page/list">
-                <span></span>
-                <span>
+                </a>
+                <a th:if="${isManager}" class="menu-card" href="/leave/page/list">
                     <span class="menu-title">请假审批</span>
-                    <span class="menu-desc">查询并审批请假申请。</span>
-                </span>
-            </a>
-            <a th:if="${isManager}" class="menu-card" href="/student/page/import">
-                <span></span>
-                <span>
+                    <span class="menu-desc">处理待审批的申请。</span>
+                </a>
+                <a th:if="${isManager}" class="menu-card" href="/student/page/import">
                     <span class="menu-title">学生导入</span>
-                    <span class="menu-desc">从 Excel 批量导入学生与登录账号。</span>
-                </span>
-            </a>
-            <a th:if="${isManager}" class="menu-card" href="/attendance/page/import">
-                <span></span>
-                <span>
+                    <span class="menu-desc">从 Excel 批量导入并建账号。</span>
+                </a>
+                <a th:if="${isManager}" class="menu-card" href="/attendance/page/import">
                     <span class="menu-title">考勤导入</span>
-                    <span class="menu-desc">从 Excel 批量补录考勤记录。</span>
-                </span>
-            </a>
-            <a class="menu-card" href="/page/password">
-                <span></span>
-                <span>
-                    <span class="menu-title">修改密码</span>
-                    <span class="menu-desc">变更当前账号的登录密码。</span>
-                </span>
-            </a>
+                    <span class="menu-desc">补录历史考勤数据。</span>
+                </a>
+            </div>
         </div>
-
-        <div class="btn-row">
-            <a class="btn btn-secondary" href="/page/logout">退出登录</a>
-        </div>
-    </section>
+    </main>
 </div>
 </body>
 </html>

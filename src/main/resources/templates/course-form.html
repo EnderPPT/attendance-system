@@ -7,94 +7,91 @@
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
-<div class="app-page form-page">
-    <nav class="page-nav">
-        <a href="/dashboard">首页</a>
-        <a href="/course/page/list">课程目录</a>
-        <a class="active" href="#">表单</a>
-    </nav>
+<div class="app-shell">
+    <th:block th:replace="~{fragments/sidebar :: sidebar('courses')}"></th:block>
 
-    <section class="hero-card">
-        <div class="hero-content">
+    <main class="main">
+        <div class="page-head">
             <div>
-                <div class="eyebrow">№ 201 · Course Form</div>
-                <h1 class="hero-title" th:text="${pageTitle}">课程信息</h1>
-                <p class="hero-desc">填写课程基本信息、上课安排与教室座位布局。</p>
+                <h1 class="page-title" th:text="${pageTitle}">课程信息</h1>
+                <p class="page-subtitle">填写课程基本信息、上课安排与教室座位布局。</p>
             </div>
-            <a class="btn btn-secondary" href="/course/page/list">返回列表</a>
+            <div class="actions">
+                <a class="btn btn-secondary" href="/course/page/list">返回列表</a>
+            </div>
         </div>
-    </section>
 
-    <section class="panel">
-        <p th:if="${error}" class="error" th:text="${error}"></p>
+        <div class="panel">
+            <p th:if="${error}" class="error" th:text="${error}"></p>
 
-        <form th:action="@{/course/page/save}" th:object="${course}" method="post">
-            <input type="hidden" th:field="*{courseId}">
-            <div class="form-grid">
-                <div class="form-group">
-                    <label>课程代码</label>
-                    <input th:field="*{courseCode}" required maxlength="20" placeholder="例如 CS101">
-                </div>
-                <div class="form-group">
-                    <label>课程名称</label>
-                    <input th:field="*{courseName}" required maxlength="50">
-                </div>
-                <div class="form-group">
-                    <label>授课班级</label>
-                    <input th:field="*{className}" required maxlength="50">
-                </div>
-                <div class="form-group">
-                    <label>教师工号</label>
-                    <input type="number" th:field="*{teacherId}" min="1" required>
-                </div>
-                <div class="form-group">
-                    <label>教室名称</label>
-                    <input th:field="*{classroomName}" required maxlength="50">
-                </div>
-                <div class="form-group">
-                    <label>排除座位 <small>例如 1,1;1,2</small></label>
-                    <input th:field="*{excludeSeats}" maxlength="200" placeholder="可选">
-                </div>
-                <div class="form-group">
-                    <label>座位行数</label>
-                    <input type="number" th:field="*{layoutRows}" min="1" required>
-                </div>
-                <div class="form-group">
-                    <label>座位列数</label>
-                    <input type="number" th:field="*{layoutCols}" min="1" required>
-                </div>
-                <div class="form-group">
-                    <label>星期 <small>1-7</small></label>
-                    <input type="number" th:field="*{weekday}" min="1" max="7">
-                </div>
-                <div class="form-group">
-                    <label>教学周</label>
-                    <div class="inline-inputs">
-                        <input type="number" th:field="*{startWeek}" min="1" placeholder="始">
-                        <span style="color:var(--muted)">—</span>
-                        <input type="number" th:field="*{endWeek}" min="1" placeholder="终">
+            <form th:action="@{/course/page/save}" th:object="${course}" method="post">
+                <input type="hidden" th:field="*{courseId}">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>课程代码</label>
+                        <input th:field="*{courseCode}" required maxlength="20" placeholder="例如 CS101">
+                    </div>
+                    <div class="form-group">
+                        <label>课程名称</label>
+                        <input th:field="*{courseName}" required maxlength="50">
+                    </div>
+                    <div class="form-group">
+                        <label>授课班级</label>
+                        <input th:field="*{className}" required maxlength="50">
+                    </div>
+                    <div class="form-group">
+                        <label>教师工号</label>
+                        <input type="number" th:field="*{teacherId}" min="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label>教室名称</label>
+                        <input th:field="*{classroomName}" required maxlength="50">
+                    </div>
+                    <div class="form-group">
+                        <label>排除座位 <small>例如 1,1;1,2</small></label>
+                        <input th:field="*{excludeSeats}" maxlength="200" placeholder="可选">
+                    </div>
+                    <div class="form-group">
+                        <label>座位行数</label>
+                        <input type="number" th:field="*{layoutRows}" min="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label>座位列数</label>
+                        <input type="number" th:field="*{layoutCols}" min="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label>星期 <small>1-7</small></label>
+                        <input type="number" th:field="*{weekday}" min="1" max="7">
+                    </div>
+                    <div class="form-group">
+                        <label>教学周</label>
+                        <div class="inline-inputs">
+                            <input type="number" th:field="*{startWeek}" min="1" placeholder="始">
+                            <span style="color:var(--muted)">—</span>
+                            <input type="number" th:field="*{endWeek}" min="1" placeholder="终">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>上课开始时间</label>
+                        <input type="time" th:field="*{startTime}">
+                    </div>
+                    <div class="form-group">
+                        <label>上课结束时间</label>
+                        <input type="time" th:field="*{endTime}">
+                    </div>
+                    <div class="form-group">
+                        <label>迟到阈值 <small>分钟，默认 15</small></label>
+                        <input type="number" th:field="*{lateThresholdMinutes}" min="0" max="180">
                     </div>
                 </div>
-                <div class="form-group">
-                    <label>上课开始时间</label>
-                    <input type="time" th:field="*{startTime}">
-                </div>
-                <div class="form-group">
-                    <label>上课结束时间</label>
-                    <input type="time" th:field="*{endTime}">
-                </div>
-                <div class="form-group">
-                    <label>迟到阈值 <small>分钟，默认 15</small></label>
-                    <input type="number" th:field="*{lateThresholdMinutes}" min="0" max="180">
-                </div>
-            </div>
 
-            <div class="btn-row">
-                <button class="btn btn-primary" type="submit">保 存</button>
-                <a class="btn btn-secondary" href="/course/page/list">取消</a>
-            </div>
-        </form>
-    </section>
+                <div class="btn-row">
+                    <button class="btn btn-primary" type="submit">保 存</button>
+                    <a class="btn btn-secondary" href="/course/page/list">取消</a>
+                </div>
+            </form>
+        </div>
+    </main>
 </div>
 </body>
 </html>

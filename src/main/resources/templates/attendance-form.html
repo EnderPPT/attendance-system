@@ -7,63 +7,61 @@
     <link rel="stylesheet" href="/css/style.css" th:href="@{/css/style.css}">
 </head>
 <body>
-<div class="app-page">
-    <nav class="page-nav"><a class="active" href="/dashboard">首页</a></nav>
+<div class="app-shell">
+    <th:block th:replace="~{fragments/sidebar :: sidebar('checkin')}"></th:block>
 
-    <section class="hero-card">
-        <div class="hero-content">
+    <main class="main">
+        <div class="page-head">
             <div>
-                <div class="eyebrow">№ 400 · Check-In</div>
-                <h1 class="hero-title">考勤打卡</h1>
-                <p class="hero-desc">选择课程后在座位图上点选位置。系统根据上课时间判定出勤状态。</p>
+                <h1 class="page-title">考勤打卡</h1>
+                <p class="page-subtitle">选择课程后在座位图上点选位置。系统根据课程上课时间判定出勤状态。</p>
             </div>
-            <a href="/dashboard" class="btn btn-secondary">返回首页</a>
         </div>
-    </section>
 
-    <section class="panel">
-        <p th:if="${errorMsg}" class="error" th:text="${errorMsg}"></p>
-        <p th:if="${successMsg}" class="success" th:text="${successMsg}"></p>
+        <div class="panel">
+            <p th:if="${errorMsg}" class="error" th:text="${errorMsg}"></p>
+            <p th:if="${successMsg}" class="success" th:text="${successMsg}"></p>
 
-        <form th:action="@{/attendance/page/checkin}" method="post" id="checkinForm">
-            <div class="form-grid">
-                <div class="form-group full">
-                    <label>学号 / 用户 ID</label>
-                    <input th:if="${isStudent}" type="number" name="studentId" th:value="${sessionUserId}" readonly required>
-                    <input th:unless="${isStudent}" type="number" name="studentId" placeholder="非学生身份打卡需手动填写" required>
-                    <small th:if="${isStudent}" style="color:var(--muted); font-size:12px; margin-top:6px;">学生身份由当前登录账号自动锁定。</small>
+            <form th:action="@{/attendance/page/checkin}" method="post" id="checkinForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>学号 / 用户 ID</label>
+                        <input th:if="${isStudent}" type="number" name="studentId" th:value="${sessionUserId}" readonly required>
+                        <input th:unless="${isStudent}" type="number" name="studentId" placeholder="非学生身份打卡需手动填写" required>
+                        <small th:if="${isStudent}" style="color:var(--muted); font-size:12px; margin-top:6px; display:block;">由当前账号自动锁定。</small>
+                    </div>
+                    <div class="form-group">
+                        <label>课程</label>
+                        <select name="courseId" id="courseSelect" required>
+                            <option value="">— 请选择课程 —</option>
+                            <option th:each="course : ${courses}" th:value="${course.courseId}"
+                                    th:selected="${course.courseId == courseId}"
+                                    th:text="${course.courseCode + '   ' + course.courseName + '   ' + course.className}"></option>
+                        </select>
+                    </div>
                 </div>
-                <div class="form-group full">
-                    <label>课程</label>
-                    <select name="courseId" id="courseSelect" required>
-                        <option value="">— 请选择课程 —</option>
-                        <option th:each="course : ${courses}" th:value="${course.courseId}"
-                                th:selected="${course.courseId == courseId}"
-                                th:text="${course.courseCode + '   ' + course.courseName + '   ' + course.className}"></option>
-                    </select>
+
+                <div class="seat-board">
+                    <div class="seat-podium" id="seatPodium">请先选择课程</div>
+                    <div id="seatGrid" class="seat-hint">选择课程后将显示该教室的座位图。</div>
+                    <div class="seat-legend">
+                        <span><i style="background:var(--surface)"></i>可选</span>
+                        <span><i style="background:var(--ok); border-color:var(--ok)"></i>已选中</span>
+                        <span><i style="background:var(--bad-soft); border-color:var(--bad-soft)"></i>已占用</span>
+                        <span><i style="background:var(--bg); border-color:var(--border)"></i>不可用</span>
+                    </div>
                 </div>
-            </div>
 
-            <div class="seat-board">
-                <div class="seat-podium" id="seatPodium">— 请先选择课程 —</div>
-                <div id="seatGrid" class="seat-hint">选择课程后将显示该教室的座位图。</div>
-                <div class="seat-legend">
-                    <span><i style="background:var(--paper)"></i>可选</span>
-                    <span><i style="background:var(--ok); border-color:var(--ok)"></i>已选中</span>
-                    <span><i style="background:var(--accent); border-color:var(--accent)"></i>已占用</span>
-                    <span><i style="background:var(--rule-soft); border-color:var(--rule-soft)"></i>不可用</span>
+                <input type="hidden" name="seatRow" id="seatRow" required>
+                <input type="hidden" name="seatCol" id="seatCol" required>
+                <p id="seatSummary" style="text-align:center; color:var(--muted); margin:6px 0 18px;">尚未选择座位</p>
+
+                <div class="btn-row">
+                    <button type="submit" class="btn btn-primary btn-block" id="submitBtn" disabled>提交打卡</button>
                 </div>
-            </div>
-
-            <input type="hidden" name="seatRow" id="seatRow" required>
-            <input type="hidden" name="seatCol" id="seatCol" required>
-            <p id="seatSummary" style="text-align:center; color:var(--muted); margin:6px 0; font-style:italic;">尚未选择座位</p>
-
-            <div class="btn-row">
-                <button type="submit" class="btn btn-primary btn-block" id="submitBtn" disabled>提交打卡</button>
-            </div>
-        </form>
-    </section>
+            </form>
+        </div>
+    </main>
 </div>
 
 <script th:inline="javascript">
@@ -87,12 +85,12 @@
         if (!courseId) {
             grid.className = 'seat-hint';
             grid.innerHTML = '选择课程后将显示该教室的座位图。';
-            podium.textContent = '— 请先选择课程 —';
+            podium.textContent = '请先选择课程';
             reset();
             return;
         }
         grid.className = 'seat-hint';
-        grid.innerHTML = '正在加载座位图…';
+        grid.innerHTML = '正在加载…';
         fetch('/seat/layout/' + courseId).then(r => r.json()).then(resp => {
             if (!resp || resp.code !== 200 || !resp.data) {
                 grid.innerHTML = '加载失败：' + (resp && resp.msg ? resp.msg : '未知错误');
@@ -109,10 +107,10 @@
         const excluded = new Set((data.excluded || []).map(p => p[0] + ',' + p[1]));
         const occupied = new Set((data.occupied || []).map(p => p[0] + ',' + p[1]));
 
-        podium.textContent = '— ' + data.classroomName + ' · 讲 台 —';
+        podium.textContent = data.classroomName + ' · 讲 台';
 
         grid.className = 'seat-grid';
-        grid.style.gridTemplateColumns = 'auto repeat(' + cols + ', 34px)';
+        grid.style.gridTemplateColumns = 'auto repeat(' + cols + ', 32px)';
         grid.innerHTML = '';
 
         for (let r = 1; r <= rows; r++) {

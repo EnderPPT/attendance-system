@@ -3,110 +3,104 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>学生管理</title>
+    <title>学生档案</title>
     <link rel="stylesheet" href="/css/style.css" th:href="@{/css/style.css}">
 </head>
 <body>
-<div class="student-page">
-    <nav class="page-nav"><a class="active" href="/dashboard">首页</a></nav>
+<div class="app-shell">
+    <th:block th:replace="~{fragments/sidebar :: sidebar('students')}"></th:block>
 
-    <section class="hero-card">
-        <div class="hero-content">
+    <main class="main">
+        <div class="page-head">
             <div>
-                <div class="eyebrow">№ 100 · Students</div>
-                <h1 class="hero-title">学生档案</h1>
-                <p class="hero-desc">维护学生基本资料。</p>
+                <h1 class="page-title">学生档案</h1>
+                <p class="page-subtitle">维护学生基本资料。</p>
             </div>
-            <div class="hero-stat">
-                <strong th:text="${#lists.size(students)}">0</strong>
-                <span>当前数量</span>
+            <div class="actions">
+                <div class="stat" style="margin-right:18px;">
+                    <strong th:text="${#lists.size(students)}">0</strong>
+                    <span>当前数量</span>
+                </div>
+                <a class="btn btn-add" th:href="@{/student/page/add}">新增学生</a>
             </div>
-            <a class="btn btn-add" th:href="@{/student/page/add}">新增学生</a>
         </div>
-    </section>
 
-    <section class="panel">
-        <form class="toolbar" th:action="@{/student/page/list}" method="get">
-            <div class="field">
-                <span class="search-icon">›</span>
-                <input type="text" name="keyword" placeholder="搜索学号 / 姓名 / 班级" th:value="${keyword}">
-            </div>
+        <div class="panel">
+            <form class="toolbar" th:action="@{/student/page/list}" method="get">
+                <div class="field">
+                    <span class="search-icon">⌕</span>
+                    <input type="text" name="keyword" placeholder="搜索学号 / 姓名 / 班级" th:value="${keyword}">
+                </div>
+                <div class="field">
+                    <select name="sortBy">
+                        <option value="studentId" th:selected="${sortBy == 'studentId'}">按学号</option>
+                        <option value="name" th:selected="${sortBy == 'name'}">按姓名</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <select name="direction">
+                        <option value="asc" th:selected="${direction == 'asc'}">升序</option>
+                        <option value="desc" th:selected="${direction == 'desc'}">降序</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">查询</button>
+                <a class="btn btn-reset" th:href="@{/student/page/list}">重置</a>
+            </form>
 
-            <div class="field">
-                <select name="sortBy">
-                    <option value="studentId" th:selected="${sortBy == 'studentId'}">按学号</option>
-                    <option value="name" th:selected="${sortBy == 'name'}">按姓名</option>
-                </select>
-            </div>
+            <form th:action="@{/student/page/deleteBatch}" method="post" onsubmit="return confirmBatchDelete();">
+                <div class="batch-row">
+                    <span>勾选后可批量删除。</span>
+                    <button type="submit" class="btn btn-batch">批量删除</button>
+                </div>
 
-            <div class="field">
-                <select name="direction">
-                    <option value="asc" th:selected="${direction == 'asc'}">升序</option>
-                    <option value="desc" th:selected="${direction == 'desc'}">降序</option>
-                </select>
-            </div>
-
-            <button type="submit" class="btn btn-primary">查询</button>
-            <a class="btn btn-reset" th:href="@{/student/page/list}">重置</a>
-        </form>
-
-        <form th:action="@{/student/page/deleteBatch}" method="post" onsubmit="return confirmBatchDelete();">
-            <div class="batch-row">
-                <span>勾选后可批量删除。</span>
-                <button type="submit" class="btn btn-batch">批量删除</button>
-            </div>
-
-            <div class="table-wrap">
-                <table>
-                    <thead>
-                    <tr>
-                        <th style="width:36px"><input type="checkbox" onclick="toggleAll(this)"></th>
-                        <th>学号</th>
-                        <th>姓名</th>
-                        <th>班级</th>
-                        <th>年龄</th>
-                        <th>性别</th>
-                        <th>出生日期</th>
-                        <th>联系方式</th>
-                        <th style="width:140px">操作</th>
-                    </tr>
-                    </thead>
-
-                    <tbody>
-                    <tr th:if="${#lists.isEmpty(students)}">
-                        <td colspan="9" class="empty">暂无学生数据。</td>
-                    </tr>
-
-                    <tr th:each="student : ${students}">
-                        <td>
-                            <input type="checkbox" name="studentIds" th:value="${student.studentId}">
-                        </td>
-                        <td class="student-id" th:text="${student.studentId}"></td>
-                        <td class="name-cell" th:text="${student.name}"></td>
-                        <td th:text="${student.className}"></td>
-                        <td th:text="${student.age}"></td>
-                        <td>
-                            <span class="badge"
-                                  th:classappend="${student.gender == '男'} ? ' badge-male' : (${student.gender == '女'} ? ' badge-female' : ' badge-other')"
-                                  th:text="${student.gender}"></span>
-                        </td>
-                        <td th:text="${student.birthDate}"></td>
-                        <td th:text="${student.phone}"></td>
-                        <td>
-                            <div class="actions">
-                                <a class="btn btn-edit" th:href="@{/student/page/edit/{studentId}(studentId=${student.studentId})}">编辑</a>
-                                <a class="btn btn-delete"
-                                   th:href="@{/student/page/delete/{studentId}(studentId=${student.studentId})}"
-                                   th:data-name="${student.name}"
-                                   onclick="return confirmDelete(this);">删除</a>
-                            </div>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
-        </form>
-    </section>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th style="width:36px"><input type="checkbox" onclick="toggleAll(this)"></th>
+                            <th>学号</th>
+                            <th>姓名</th>
+                            <th>班级</th>
+                            <th>年龄</th>
+                            <th>性别</th>
+                            <th>出生日期</th>
+                            <th>联系方式</th>
+                            <th style="width:140px">操作</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:if="${#lists.isEmpty(students)}">
+                            <td colspan="9" class="empty">暂无学生数据。</td>
+                        </tr>
+                        <tr th:each="student : ${students}">
+                            <td><input type="checkbox" name="studentIds" th:value="${student.studentId}"></td>
+                            <td class="student-id" th:text="${student.studentId}"></td>
+                            <td class="name-cell" th:text="${student.name}"></td>
+                            <td th:text="${student.className}"></td>
+                            <td th:text="${student.age}"></td>
+                            <td>
+                                <span class="badge"
+                                      th:classappend="${student.gender == '男'} ? ' badge-male' : (${student.gender == '女'} ? ' badge-female' : ' badge-other')"
+                                      th:text="${student.gender}"></span>
+                            </td>
+                            <td th:text="${student.birthDate}"></td>
+                            <td th:text="${student.phone}"></td>
+                            <td>
+                                <div class="actions">
+                                    <a class="btn btn-edit" th:href="@{/student/page/edit/{studentId}(studentId=${student.studentId})}">编辑</a>
+                                    <a class="btn btn-delete"
+                                       th:href="@{/student/page/delete/{studentId}(studentId=${student.studentId})}"
+                                       th:data-name="${student.name}"
+                                       onclick="return confirmDelete(this);">删除</a>
+                                </div>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </form>
+        </div>
+    </main>
 </div>
 
 <script>
